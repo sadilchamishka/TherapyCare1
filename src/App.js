@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Entry from './Entry';
 import './App.css';
 
 function App() {
@@ -8,6 +9,10 @@ function App() {
   const [supportCategory, setSupportCategory] = useState('');
   const [supportItem, setSupportItem] = useState('');
   const [itemDetails, setitemDetails] = useState('');
+  const [cart, setCart] = useState([]);
+  const [entry,setEntry] = useState([]);
+  const [hours,setHours] = useState([]);
+  const [hourslist,setHoursList] = useState([]);
 
 
   useEffect(()=>{
@@ -30,6 +35,11 @@ function App() {
     getSupportItemDetails();
   },[supportItem]);
 
+  useEffect(()=>{
+    setEntry(cart);
+  },[cart]);
+
+  
   const getSupportCategoryList = async ()=>{
     const response = await fetch("https://therapycare.herokuapp.com/supportcategoryname");
     const data = await response.json();
@@ -66,8 +76,55 @@ function App() {
     getSupportItemDetails();
   }
 
+
+  const addToCart = (event) => {
+    var obj = JSON.parse(itemDetails);
+    if (obj.Price==0){
+      setHoursList(hourslist.concat(0));
+      setCart(cart.concat([obj]));
+    }
+    else{
+      if (hours==""){
+        alert("Please add Hours");
+      }else{
+        setHoursList(hourslist.concat(hours));
+        setCart(cart.concat([obj]));
+        setHours("");
+      }
+    }
+    
+  }
+
+  const updateHours =(event) => {
+    var data = event.target.value;
+    if (data == parseInt(data, 10)){setHours(data);}
+    else{ alert("Hours should be an integer");}
+  }
+
+  const createWordDoc = async (event) => {
+    
+    fetch('https://therapycare.herokuapp.com/document', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },   
+      body: JSON.stringify({ data: entry })
+    }).then(response => {
+              response.blob().then(blob => {
+              let url = window.URL.createObjectURL(blob);
+              let a = document.createElement('a');
+              a.href = url;
+              a.download = 'summery.docx';
+              a.click();
+          });
+    });
+    
+    setCart([]);
+  }
+
   return (
     <div className="App">
+      <h1>TherapyCare</h1>
       <div>
         <select value={supportCategory} onChange={supportCategoryChange}>
         {supportCategoryList.map(category =>(
@@ -77,15 +134,37 @@ function App() {
       </div>
       
       <div>
-        <select value={supportItemList[0]} onChange={supportItemChange}>
+        <select value={supportItem} onChange={supportItemChange}>
         {supportItemList.map(item =>(
           <option value={item}>{item}</option>
         ))}
         </select>
       </div>
+      <br/>
+      <div>
+      <textarea value={itemDetails} rows="3" cols="100"></textarea>
+      <br/>
+      <label> Hours : </label>
+      <input type="text" value={hours} onChange={updateHours}></input>
+      </div>
       
       <div>
-      <p>{itemDetails}</p>
+          <button onClick={addToCart}>Add</button>
+      </div>
+
+      <div>
+      
+      </div>
+        {entry.map((item,i) =>(
+          <Entry
+          supportCategory={item.SupportCategoryName}
+          supportItemNumber={item.SupportItemNumber}
+          SupportItemName={item.SupportItemName}
+          price={item.Price*hourslist[i]}
+          />
+        ))}
+      <div>
+          <button onClick={createWordDoc}>Submit</button>
       </div>
 
     </div>
