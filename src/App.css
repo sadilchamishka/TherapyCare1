@@ -26,6 +26,10 @@
   color: white;
 }
 
+.label {
+  margin-left: 4.5rem; 
+}
+
 .App-link {
   color: #61dafb;
 }
