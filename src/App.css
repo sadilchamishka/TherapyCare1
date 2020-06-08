@@ -1,6 +1,5 @@
 .App {
   min-height: 100vh;
-  text-align: center;
   background-image: linear-gradient(to top, #d5d4d0 0%, #d5d4d0 1%, #eeeeec 31%, #efeeec 75%, #e9e9e7 100%);
 }
 
@@ -9,9 +8,30 @@
   position: relative; 
 }
 
+.dropdown {
+  width: 450px;
+  height: 30px;
+  margin: 15px;
+}
+
 .goal {
-  width: 500px;
+  width: 800px;
   margin: 10px;
+}
+
+.textfield {
+  height: 30px;
+  margin: 15px;
+}
+
+.textarea {
+  height: 20px;
+  width: 500px;
+  margin: 20px;
+}
+
+.d {
+  margin: 200px;
 }
 
 .App-logo {
@@ -42,6 +62,11 @@
 
 .App-link {
   color: #61dafb;
+}
+
+.special {
+  color:black;
+  background:rgb(188, 236, 240);
 }
 
 @keyframes App-logo-spin {

@@ -1,188 +1,133 @@
 import React, { useEffect, useState } from 'react';
-import Button from '@material-ui/core/Button';
-
+import {Button,Select,MenuItem,TextField,InputLabel,FormControl,Input,Checkbox} from '@material-ui/core';
 import Entry from './Entry';
 import './App.css';
 
 function App() {
 
-  const [supportCategoryList, setSupportCategoryList] = useState([]);
-  const [goalsList, setgoalsList] = useState([]);
+  const [supportCategoryList, setSupportCategoryList] = useState([]); // List of support category names from back end
+  const [supportCategory, setSupportCategory] = useState('');         // selected current support category
 
-  const [supportItemList, setSupportItemList] = useState([]);
-  const [supportCategory, setSupportCategory] = useState('');
+  const [supportItemList, setSupportItemList] = useState([]);         // list of support item names from back end
+  const [supportItem, setSupportItem] = useState('');                 // selected support item name 
 
-  const [supportItem, setSupportItem] = useState('');
-  const [itemDetails, setitemDetails] = useState('');
-  const [cart, setCart] = useState([]);
-  const [entry,setEntry] = useState([]);
-  const [hoursperWeek,setHoursPerWeek] = useState(0);
-  const [duration,setDuration] = useState(0);
+  const [itemDetails, setitemDetails] = useState('');                 // Details of the selected item from back end
 
-  const [tempGoal,setTempGoal] = useState("");
-  const [customGoal,setCustomGoal] = useState("");
+  const [goalsList, setgoalsList] = useState([]);                     // List of goals recived from back end
+  const [policyList, setPolicyList] = useState([]);                   // List of policies recived from back end
+  const [selectedPolicies,setSelectedPolicies] = useState([]);
 
-  const [hoursPerWeekList,sethoursPerWeekList] = useState([]);
-  const [durationList,setDurationList] = useState([]);
+  const [period, setPeriod] = useState("Hours Per Week");            // set period type to hours per week by default
+  const [hours,setHours] = useState("");                              // number of hours per week or per month
+  const [frequency,setFrequency] = useState("");                      // number of weeks or months
+  const [hoursList,setHoursList] = useState([]);                     // hours list for each entry
 
-  const [attacheLocalGoalList,setAttachedLocalGoalList] = useState([]);
-  const [attachedGoalList,setAttachedGoalList] = useState([]);
+  const [cart, setCart] = useState([]);                              // Cart holds all the entries user made
+
+  const [goals, setGoals] = useState([]);                            // User selected goals for a support item
+  const [customGoal,setCustomGoal] = useState("");                   // Custom goal the user wants attach
+  const [attachedGoalList,setAttachedGoalList] = useState([]);       // All the goals user has attached for each support items
+
+  const [participantName, setParticipantName] = useState("");  
+  const [ndis, setNdis] = useState("");                              
+  const [sosPrepared, setSosPrepared] = useState("");  
+  const [startDate, setStartDate] = useState("");                              
+  const [endDate, setEndDate] = useState("");    
+  const [duration, setDuration] = useState("");                              
+                          
+  const [deleted, setDeleted] = useState(0);                        
+                            
 
 
-
+  // When the page loads, support category names and goals are fetching from the backend
   useEffect(()=>{
     getSupportCategoryList();
-  },[]);
-
-  useEffect(()=>{
     getGoalsList();
+    getPolicyList();
   },[]);
 
+  // After support category list is set, the first element is taken as choosen support category
   useEffect(()=>{
     setSupportCategory(supportCategoryList[0]);
   },[supportCategoryList]);
 
-  useEffect(()=>{
-    setTempGoal(goalsList[0]);
-  },[goalsList]);
-
+  // When support category is set, start to fetch support items related to it
   useEffect(()=>{
     getSupportItemList();
   },[supportCategory]);
 
+  // After support item list is arrived, the first element is taken as choosen item
   useEffect(()=>{
     setSupportItem(supportItemList[0]);
   },[supportItemList]);
 
+  // When item is set, start to fetch support item details from the back end
   useEffect(()=>{
     getSupportItemDetails();
   },[supportItem]);
 
   useEffect(()=>{
-    setEntry(cart);
-  },[cart]);
+    checkDeleted();
+  },[deleted]);
 
-  useEffect(()=>{
-    setDuration("");
-  },[durationList]);
+  const checkDeleted = ()=>{
+     if (deleted==1){
+       alert("Item Deleted");
+       setDeleted(0);
+     }
+  }
 
-  useEffect(()=>{
-    setHoursPerWeek("");
-  },[hoursPerWeekList]);
-
-  
+  // Fetch support category names from back end
   const getSupportCategoryList = async ()=>{
     const response = await fetch("https://therapycare.herokuapp.com/supportcategoryname");
     const data = await response.json();
     setSupportCategoryList(data.SupportCategoryName);
   };
 
+  // Fetch goals from backend
   const getGoalsList = async ()=>{
     const response = await fetch("https://therapycare.herokuapp.com/goals");
     const data = await response.json();
     setgoalsList(data.goals);
   };
+
+  // Fetch policies from backend
+  const getPolicyList = async ()=>{
+    const response = await fetch("https://therapycare.herokuapp.com/policy");
+    const data = await response.json();
+    setPolicyList(data.policy);
+    var i;
+    var policyId = []
+    for (i = 0; i < data.policy.length; i++) {
+      policyId.push(0);
+    }
+    
+    setSelectedPolicies(policyId);
+  };
   
+
+  // Fetch supoort items corresponding to the support categroy from the back end
   const getSupportItemList = async ()=>{
     const response = await fetch(`https://therapycare.herokuapp.com/supportitemname?supportcategoryname=${supportCategory}`);
     const data = await response.json();
-    var items = [];
-    var index = 0;
-    
-    data.SupportItem.map(item => {
-      items[index] = item.ItemName;
-      index = index + 1;
-    });
-
-    setSupportItemList(items);
+    setSupportItemList(data.SupportItem);
   };
 
+  // Fetch support item details for corresponding item from the back end
   const getSupportItemDetails = async ()=>{
     const response = await fetch(`https://therapycare.herokuapp.com/supportitemdetails?supportitem=${supportItem}`);
     const data = await response.text();
     setitemDetails(data);
   }
 
-  const supportCategoryChange = (event) => {
-    setSupportCategory(event.target.value);
-  }
-
-  const supportItemChange = (event) => {
-    setSupportItem(event.target.value);
-    getSupportItemDetails();
-  }
-
-
-  const addToCart = (event) => {
-
-      if (hoursperWeek==""){
-        alert("Please add Hours");
-      }
-      else if (duration==""){
-        alert("Please add Duartion");
-      }
-      else{
-        if (hoursperWeek == parseInt(hoursperWeek, 10)){
-
-          if (duration == parseInt(duration, 10)){
-            setDurationList(durationList.concat(duration));
-            sethoursPerWeekList(hoursPerWeekList.concat(hoursperWeek));
-            setCart(cart.concat([JSON.parse(itemDetails)]));
-            setAttachedGoalList(attachedGoalList.concat([attacheLocalGoalList]));
-            setAttachedLocalGoalList([]);
-          }
-          else{ alert("Duration should be an integer"); }
-          
-        }
-        else{ alert("Hours should be an integer");}
-        
-      }    
-  }
-
-  const updateHoursPerWeek = (event) => {
-    setHoursPerWeek(event.target.value);
-  }
-
-  const updatDuration =(event) => {
-    setDuration(event.target.value);
-  }
-
-  const addGoal = (event) => {
-    setTempGoal(event.target.value);
-  }
-
-  const addCustomGoal = (event) => {
-    setCustomGoal(event.target.value);
-  }
-
-  const attachGoal = (event) =>{
-    if (tempGoal===""){
-      alert("No Goal set");
-    }else{
-      setAttachedLocalGoalList(attacheLocalGoalList.concat(tempGoal));
-      alert("Successfully attached the goal: ".concat(tempGoal));
-      setTempGoal("");
-    }
-  }
-
-  const attachCustomGoal = (event) =>{
-    if (customGoal===""){
-      alert("No Goal set");
-    }else{
-      setAttachedLocalGoalList(attacheLocalGoalList.concat(customGoal));
-      alert("Successfully attached custom goal: ".concat(customGoal));
-      setCustomGoal("");
-    }
-  }
-
-  const createWordDoc = async (event) => {
-    
+  // Create word document
+  const createWordDoc = async () => {
     fetch('https://therapycare.herokuapp.com/document', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },   
-      body: JSON.stringify({ data: entry, hoursperweek: hoursPerWeekList, duration: durationList, goals: attachedGoalList })
+      body: JSON.stringify({ data: cart, goals: attachedGoalList, hours:hoursList, start:startDate, end:endDate, duration:duration, name:participantName, ndis:ndis, sos:sosPrepared, policy:" ", today:"today1" })
     }).then(response => {
               response.blob().then(blob => {
               let url = window.URL.createObjectURL(blob);
@@ -195,82 +140,243 @@ function App() {
     
     setCart([]);
     setAttachedGoalList([]);
+    setHoursList([]);
   }
+
+  const updateParticipantName = (event) => {
+    setParticipantName(event.target.value);
+  }
+
+  const updateNDIS = (event) => {
+    setNdis(event.target.value);
+  }
+
+  const updatePreparedBy = (event) => {
+    setSosPrepared(event.target.value);
+  }
+
+  const updateStartDate = (event) => {
+    setStartDate(event.target.value);
+  }
+
+  const updateEndDate = (event) => {
+    var date1 = new Date(startDate);
+    var date2 = new Date(event.target.value);
+    var timeDiff = date2.getTime() - date1.getTime();
+    var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24)); 
+
+    if (diffDays>0){
+      setEndDate(event.target.value);
+      setDuration(diffDays);
+    }else{
+      alert("Invalid End Date");
+    }
+  }
+
+  // update when support category is changed from drop down menue
+  const supportCategoryChange = (event) => {
+    setSupportCategory(event.target.value);
+  }
+
+  // update when support item is changed from drop down menue
+  const supportItemChange = (event) => {
+    setSupportItem(event.target.value);
+  }
+
+  // Add entry to the cart
+  const addToCart = () => {
+      if (frequency==""){
+        setHoursList(hoursList.concat(hours))
+      }else{
+        setHoursList(hoursList.concat(hours*frequency))           // Total work hours add to hours list
+      }
+      setCart(cart.concat([JSON.parse(itemDetails)]));          // Add support item details to the cart
+      setAttachedGoalList(attachedGoalList.concat([goals]));    // Add attached goals for the item to global list of attached goals
+      
+      // Clear variables after successfully adding to the cart
+      setGoals([]);   
+      setHours("");
+      setFrequency("");   
+  }
+
+  const deleteFromCart = (index) => {
+    hoursList.splice(index,1);
+    cart.splice(index,1);
+    attachedGoalList.splice(index);
+
+    setHoursList(hoursList);
+    setCart(cart);
+    setAttachedGoalList(attachedGoalList);
+
+    setDeleted(1);
+  }
+
+  // Update period category when user change drop down menue
+  const setPeriodCategory = (event) => {
+    setPeriod(event.target.value);
+  }
+
+  // Update hours when user type number of hours
+  const updateHours = (event) => {
+    setHours(event.target.value);
+  };
+  
+  // Update frequency when user type number of week or months
+  const updateFrequency = (event) => {
+    setFrequency(event.target.value);
+  };
+
+  // Return corresponding text boxes when user select period from drop down menue
+  const timeDiv = () => {
+    if (period=="Hours Per Week"){
+      return (
+        <div>
+          <TextField value={hours} label="Number of Hours" onChange={updateHours}></TextField>  &emsp;
+          <TextField value={frequency} label="Number of Weeks" onChange={updateFrequency}></TextField>
+        </div>
+        )
+    }else if (period=="Hours Per Month"){
+      return (
+        <div>
+          <TextField value={hours} label="Number of Hours" onChange={updateHours}></TextField> &emsp;
+          <TextField value={frequency} label="Number of Months"  onChange={updateFrequency}></TextField>
+        </div>
+        )
+    }else if (period=="Hours Per Plan Period"){
+      return (
+        <div>
+          <TextField value={hours} label="Number of Hours" onChange={updateHours}></TextField>
+        </div>
+        )
+    }
+    
+  };
+
+  const ITEM_HEIGHT = 48;
+  const ITEM_PADDING_TOP = 80;
+  const MenuProps = {
+    PaperProps: {
+      style: {
+        maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+        width: 650
+      }
+    },
+    getContentAnchorEl: null
+  
+  };
+
+const updateGoals = (event) => {
+  setGoals(event.target.value);
+};
+
+const addCustomGoal = (event) => {
+  setCustomGoal(event.target.value);
+}
+
+const attachCustomGoal = (event) =>{
+  if (customGoal===""){
+    alert("No Goal set");
+  }else{
+    setGoals(goals.concat(customGoal));
+    alert("Successfully attached custom goal: ".concat(customGoal));
+    setCustomGoal("");
+  }
+}
 
   return (
     <div className="App">
     <br></br><br></br>
-      <div>
-        <label><b>Select Support Category :</b>  </label>
-        <select value={supportCategory} onChange={supportCategoryChange}>
+    <TextField value={participantName} label="Participant Name" onChange={updateParticipantName}></TextField> &emsp;
+    <TextField value={ndis} label="NDIS number" onChange={updateNDIS}></TextField> &emsp;
+    <TextField value={sosPrepared} label="SOS Prepared by" onChange={updatePreparedBy}></TextField> &emsp;
+    <label>Start Date</label>
+    <Input value={startDate} className="textfield" type="date" onChange={updateStartDate}/>  &emsp;
+    <label>End Date</label>
+    <Input value={endDate} className="textfield" type="date" onChange={updateEndDate}/> &emsp;
+
+    <br></br> <br></br>
+      <FormControl className="d">
+        <InputLabel><b>Select Support Category :</b></InputLabel>
+        <Select className="dropdown" value={supportCategory} onChange={supportCategoryChange} variant="outlined">
         {supportCategoryList.map(category =>(
-          <option value={category}>{category}</option>
+          <MenuItem value={category}>{category}</MenuItem>
         ))}
-        </select>
-      </div>
-      <br></br>
-      <div>
-        <label> <b>Select Support Item : </b></label>
-        <select value={supportItem} onChange={supportItemChange}>
+        </Select>
+      </FormControl>
+
+      <FormControl>
+      <InputLabel><b>Select Support Item :</b></InputLabel>
+        <Select className="dropdown" value={supportItem} onChange={supportItemChange} variant="outlined">
         {supportItemList.map(item =>(
-          <option value={item}>{item}</option>
+          <MenuItem className="special" value={item}>{item}</MenuItem>
         ))}
-        </select>
-      </div>
-      <div>
-      <br/>
-      <label> <b>Hours per Week:</b> </label>
-      <input type="text" value={hoursperWeek} onChange={updateHoursPerWeek} placeholder="0"></input>
+        </Select>
+      </FormControl>
 
-      <label> <b>Duration:</b> </label>
-      <input type="text" value={duration} onChange={updatDuration} placeholder="0"></input>
-      </div>
+      <FormControl>
+      <InputLabel><b>Select Period:</b></InputLabel>
+        <Select className="textfield" onChange={setPeriodCategory} value={period} variant="outlined">
+          <MenuItem className="special" value="Hours Per Week">Hours Per Week</MenuItem>
+          <MenuItem className="special" value="Hours Per Month">Hours Per Month</MenuItem>
+          <MenuItem className="special" value="Hours Per Plan Period">Hours Per Plan Period</MenuItem>
+        </Select>
+      </FormControl>
+
+      {timeDiv()}
+      <br></br> 
+
+      <FormControl>
+      <InputLabel><b>Add Goals</b></InputLabel>
+      <Select className="dropdown" value={goals} onChange={updateGoals} multiple MenuProps={MenuProps} variant="outlined">
+          {goalsList.map(name => (
+            <MenuItem key={name} value={name}>
+              {name}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+
       <br></br>
       <div>
-        <label> <b>Select Goal :</b></label>
-          <select className="goal" value={tempGoal} onChange={addGoal}>
-          {goalsList.map(item =>(
-            <option value={item}>{item}</option>
-          ))}
-          </select>
+        <TextField className="textarea" label="Add Custom Goals" onChange={addCustomGoal} value={customGoal} variant="outlined" multiline></TextField> &emsp;
+        <Button onClick={attachCustomGoal} variant="outlined" color="primary"> Attach Custom Goal </Button>
+      </div>
+        
+      <br></br><br></br>
+      <div>
+        <TextField className="textarea" id="outlined-basic" label="Add Description" variant="outlined" multiline/>
+      </div>
 
-          <Button onClick={attachGoal} variant="outlined" color="primary"> Attach Goal </Button>
-      </div>
-            <br></br>
+      <br></br><br></br>
       <div>
-      <label> <b>Add Custom Goals:</b> </label>
-      <input type="text" onChange={addCustomGoal} value={customGoal}></input>
-      <Button onClick={attachCustomGoal} variant="outlined" color="primary"> Attach Custom Goal </Button>
+        <Button onClick={addToCart} variant="contained" color="primary"> Add </Button>
       </div>
+      <br/>
       
-      <br/>
       <div>
-      <Button onClick={addToCart} variant="contained" color="primary"> Add </Button>
-      </div>
-      <br/>
-      <div>
-        <br/>
-        <div align="left">
-        <label className="label"> <b>supportCategory</b> </label>
-        <label className="label"> <b>supportItemNumber</b> </label>
-        <label className="label"> <b>SupportItemName</b>  </label>
-        <label className="label"> <b>HoursPerWeek</b> </label>
-        <label className="label"> <b>duration</b> </label>
-        <label className="label"> <b>price</b> </label>
-        </div>
-        <br></br>
-        {entry.map((item,i) =>(
+        {cart.map((item,i) =>(
           <Entry
           supportCategory={item.SupportCategoryName}
           supportItemNumber={item.SupportItemNumber}
           SupportItemName={item.SupportItemName}
-          HoursPerWeek={hoursPerWeekList[i]}
-          duration={durationList[i]}
-          price={item.Price*hoursPerWeekList[i]*durationList[i]*4}
+          price={item.Price*hoursList[i]}
+          index={i}
+          deleteFunction={deleteFromCart}
           />
         ))}
       </div>  
       
+      {policyList.map((policy,i)=>(
+        <div>
+          <label>{policy}</label>
+          <Checkbox
+          value={i}
+        
+          color="primary"
+          inputProps={{ 'aria-label': 'secondary checkbox' }}
+          />
+        </div>  
+      ))}
       <div>
       <Button onClick={createWordDoc} variant="contained" color="primary"> Submit </Button>
       </div>
