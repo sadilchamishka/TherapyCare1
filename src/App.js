@@ -2,8 +2,36 @@ import React, { useEffect, useState } from 'react';
 import {Button,Select,MenuItem,TextField,InputLabel,FormControl,Input,Checkbox} from '@material-ui/core';
 import Entry from './Entry';
 import './App.css';
+import { makeStyles } from '@material-ui/core/styles';
+import Paper from '@material-ui/core/Paper';
+import Grid from '@material-ui/core/Grid';
+
+const useStyles = makeStyles((theme) => ({
+  paper1: {
+    maxWidth: 1200,
+    margin: `${theme.spacing(1)}px auto`,
+    padding: theme.spacing(2),
+    textAlign: 'right',
+    color: theme.palette.text.secondary,
+  },
+  paper2: {
+    maxWidth: 750,
+    margin: `${theme.spacing(1)}px auto`,
+    padding: theme.spacing(2),
+    textAlign: 'left',
+    color: theme.palette.text.secondary,
+  },
+  paper3: {
+    maxWidth: 1150,
+    margin: `${theme.spacing(1)}px 25px`,
+    textAlign: 'left',
+    color: theme.palette.text.secondary,
+  },
+}));
+
 
 function App() {
+  const classes = useStyles();
 
   const [supportCategoryList, setSupportCategoryList] = useState([]); // List of support category names from back end
   const [supportCategory, setSupportCategory] = useState('');         // selected current support category
@@ -27,6 +55,10 @@ function App() {
   const [goals, setGoals] = useState([]);                            // User selected goals for a support item
   const [customGoal,setCustomGoal] = useState("");                   // Custom goal the user wants attach
   const [attachedGoalList,setAttachedGoalList] = useState([]);       // All the goals user has attached for each support items
+
+  const [description, setDescription] = useState("");
+  const [descriptionList, setDescriptionList] = useState([]);
+
 
   const [participantName, setParticipantName] = useState("");  
   const [ndis, setNdis] = useState("");                              
@@ -122,12 +154,19 @@ function App() {
 
   // Create word document
   const createWordDoc = async () => {
+    var policies = "";
+    for (var i = 0; i < selectedPolicies.length; i++) {
+      if (selectedPolicies[i]==1){
+        policies = policies.concat(policyList[i]).concat("\n");
+      }
+    }
+
     fetch('https://therapycare.herokuapp.com/document', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },   
-      body: JSON.stringify({ data: cart, goals: attachedGoalList, hours:hoursList, start:startDate, end:endDate, duration:duration, name:participantName, ndis:ndis, sos:sosPrepared, policy:" ", today:"today1" })
+      body: JSON.stringify({ data: cart, goals: attachedGoalList,description:descriptionList, hours:hoursList, start:startDate, end:endDate, duration:duration, name:participantName, ndis:ndis, sos:sosPrepared, policy:policies, today:"today1" })
     }).then(response => {
               response.blob().then(blob => {
               let url = window.URL.createObjectURL(blob);
@@ -141,6 +180,10 @@ function App() {
     setCart([]);
     setAttachedGoalList([]);
     setHoursList([]);
+  }
+
+  const updateDescription = (event) => {
+    setDescription(event.target.value);
   }
 
   const updateParticipantName = (event) => {
@@ -192,21 +235,24 @@ function App() {
       }
       setCart(cart.concat([JSON.parse(itemDetails)]));          // Add support item details to the cart
       setAttachedGoalList(attachedGoalList.concat([goals]));    // Add attached goals for the item to global list of attached goals
-      
+      setDescriptionList(descriptionList.concat(description));
       // Clear variables after successfully adding to the cart
       setGoals([]);   
       setHours("");
-      setFrequency("");   
+      setFrequency(""); 
+      setDescription("");  
   }
 
   const deleteFromCart = (index) => {
     hoursList.splice(index,1);
     cart.splice(index,1);
-    attachedGoalList.splice(index);
+    attachedGoalList.splice(index,1);
+    descriptionList.splice(index,1)
 
     setHoursList(hoursList);
     setCart(cart);
     setAttachedGoalList(attachedGoalList);
+    setDescriptionList(descriptionList);
 
     setDeleted(1);
   }
@@ -224,6 +270,16 @@ function App() {
   // Update frequency when user type number of week or months
   const updateFrequency = (event) => {
     setFrequency(event.target.value);
+  };
+
+  const policyChange = (event) => {
+    var value = selectedPolicies[event.target.value];
+    if (value==0) {
+      selectedPolicies[event.target.value] = 1;
+    } else{
+      selectedPolicies[event.target.value] = 0;
+    }
+    setSelectedPolicies(selectedPolicies);
   };
 
   // Return corresponding text boxes when user select period from drop down menue
@@ -285,103 +341,113 @@ const attachCustomGoal = (event) =>{
 
   return (
     <div className="App">
-    <br></br><br></br>
-    <TextField value={participantName} label="Participant Name" onChange={updateParticipantName}></TextField> &emsp;
-    <TextField value={ndis} label="NDIS number" onChange={updateNDIS}></TextField> &emsp;
-    <TextField value={sosPrepared} label="SOS Prepared by" onChange={updatePreparedBy}></TextField> &emsp;
-    <label>Start Date</label>
-    <Input value={startDate} className="textfield" type="date" onChange={updateStartDate}/>  &emsp;
-    <label>End Date</label>
-    <Input value={endDate} className="textfield" type="date" onChange={updateEndDate}/> &emsp;
+    <br></br>
+    <Grid>
+        <Paper className={classes.paper1}>
+          <TextField value={participantName} label="Participant Name" onChange={updateParticipantName}></TextField> &emsp;
+           <TextField value={ndis} label="NDIS number" onChange={updateNDIS}></TextField> &emsp;
+          <TextField value={sosPrepared} label="SOS Prepared by" onChange={updatePreparedBy}></TextField> &emsp;
+          <label>Start Date</label>
+          <Input value={startDate} className="textfield" type="date" onChange={updateStartDate}/>  &emsp;
+          <label>End Date</label>
+          <Input value={endDate} className="textfield" type="date" onChange={updateEndDate}/> &emsp;
+        </Paper>
+    </Grid>
+    <br></br> 
+    <Grid>
+      <Paper className={classes.paper1}>
+        <FormControl className="d">
+            <InputLabel><b>Select Support Category :</b></InputLabel>
+            <Select className="dropdown" value={supportCategory} onChange={supportCategoryChange} variant="outlined">
+            {supportCategoryList.map(category =>(
+              <MenuItem value={category}>{category}</MenuItem>
+            ))}
+            </Select>
+        </FormControl>
 
-    <br></br> <br></br>
-      <FormControl className="d">
-        <InputLabel><b>Select Support Category :</b></InputLabel>
-        <Select className="dropdown" value={supportCategory} onChange={supportCategoryChange} variant="outlined">
-        {supportCategoryList.map(category =>(
-          <MenuItem value={category}>{category}</MenuItem>
-        ))}
-        </Select>
-      </FormControl>
-
-      <FormControl>
-      <InputLabel><b>Select Support Item :</b></InputLabel>
-        <Select className="dropdown" value={supportItem} onChange={supportItemChange} variant="outlined">
-        {supportItemList.map(item =>(
-          <MenuItem className="special" value={item}>{item}</MenuItem>
-        ))}
-        </Select>
-      </FormControl>
-
-      <FormControl>
-      <InputLabel><b>Select Period:</b></InputLabel>
-        <Select className="textfield" onChange={setPeriodCategory} value={period} variant="outlined">
-          <MenuItem className="special" value="Hours Per Week">Hours Per Week</MenuItem>
-          <MenuItem className="special" value="Hours Per Month">Hours Per Month</MenuItem>
-          <MenuItem className="special" value="Hours Per Plan Period">Hours Per Plan Period</MenuItem>
-        </Select>
-      </FormControl>
+        <FormControl>
+          <InputLabel><b>Select Support Item :</b></InputLabel>
+            <Select className="dropdown" value={supportItem} onChange={supportItemChange} variant="outlined">
+            {supportItemList.map(item =>(
+              <MenuItem className="special" value={item}>{item}</MenuItem>
+            ))}
+            </Select>
+        </FormControl>
+      
+        <FormControl>
+        <InputLabel><b>Select Period:</b></InputLabel>
+          <Select className="textfield" onChange={setPeriodCategory} value={period} variant="outlined">
+            <MenuItem className="special" value="Hours Per Week">Hours Per Week</MenuItem>
+            <MenuItem className="special" value="Hours Per Month">Hours Per Month</MenuItem>
+            <MenuItem className="special" value="Hours Per Plan Period">Hours Per Plan Period</MenuItem>
+          </Select>
+        </FormControl>
 
       {timeDiv()}
-      <br></br> 
-
-      <FormControl>
-      <InputLabel><b>Add Goals</b></InputLabel>
-      <Select className="dropdown" value={goals} onChange={updateGoals} multiple MenuProps={MenuProps} variant="outlined">
-          {goalsList.map(name => (
-            <MenuItem key={name} value={name}>
-              {name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-
-      <br></br>
+    </Paper>
+  </Grid>
+  <br></br> 
+  <Grid>
+      <Paper className={classes.paper2}>
+        <FormControl>
+        <InputLabel><b>Add Goals</b></InputLabel>
+        <Select className="dropdown" value={goals} onChange={updateGoals} multiple MenuProps={MenuProps} variant="outlined">
+            {goalsList.map(name => (
+              <MenuItem key={name} value={name}>
+                {name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
       <div>
         <TextField className="textarea" label="Add Custom Goals" onChange={addCustomGoal} value={customGoal} variant="outlined" multiline></TextField> &emsp;
         <Button onClick={attachCustomGoal} variant="outlined" color="primary"> Attach Custom Goal </Button>
       </div>
         
       <br></br><br></br>
+    </Paper>
+  </Grid>
       <div>
-        <TextField className="textarea" id="outlined-basic" label="Add Description" variant="outlined" multiline/>
+        <TextField value={description} className="textarea" onChange={updateDescription} variant="outlined" multiline/>
       </div>
-
       <br></br><br></br>
       <div>
         <Button onClick={addToCart} variant="contained" color="primary"> Add </Button>
       </div>
       <br/>
       
-      <div>
+      <div className="policy">
         {cart.map((item,i) =>(
           <Entry
           supportCategory={item.SupportCategoryName}
           supportItemNumber={item.SupportItemNumber}
           SupportItemName={item.SupportItemName}
+          goals={attachedGoalList[i]}
           price={item.Price*hoursList[i]}
           index={i}
           deleteFunction={deleteFromCart}
           />
         ))}
       </div>  
-      
+  
       {policyList.map((policy,i)=>(
-        <div>
+        <div className="policy">
           <label>{policy}</label>
           <Checkbox
           value={i}
-        
+          onChange={policyChange}
           color="primary"
           inputProps={{ 'aria-label': 'secondary checkbox' }}
           />
         </div>  
       ))}
+      <br></br>
       <div>
       <Button onClick={createWordDoc} variant="contained" color="primary"> Submit </Button>
       </div>
-
+      <br></br>
     </div>
+    
   );
 }
 
