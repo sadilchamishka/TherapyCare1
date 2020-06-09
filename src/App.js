@@ -333,16 +333,19 @@ function App() {
   }
 
   const deleteFromCart = (event) => {
-    var index = event.target.value;
+    var index = event;
+    alert(index);
     hoursList.splice(index,1);
     cart.splice(index,1);
     attachedGoalList.splice(index,1);
     descriptionList.splice(index,1)
+    hoursFrequencyList.splice(index,1);
 
     setHoursList(hoursList);
     setCart(cart);
     setAttachedGoalList(attachedGoalList);
     setDescriptionList(descriptionList);
+    setHoursFrequencyList(hoursFrequencyList);
 
     setDeleted(1);
   }
@@ -522,7 +525,7 @@ const attachCustomGoal = () =>{
               <StyledTableCell align="center">{displayGoals(attachedGoalList[i])}</StyledTableCell>
               <StyledTableCell align="center">{descriptionList[i]}</StyledTableCell>
               <StyledTableCell align="center">{item.Price*hoursList[i]}</StyledTableCell>
-              <br></br><Button value={i} onClick={deleteFromCart} variant="contained" color="secondary">Drop</Button>
+              <br></br><Button value={i} onClick={()=>deleteFromCart(i)} variant="contained" color="secondary">Drop</Button>
             </StyledTableRow>
           ))}
         </TableBody>
