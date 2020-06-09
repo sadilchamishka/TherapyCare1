@@ -1,12 +1,36 @@
 import React, { useEffect, useState } from 'react';
 import {Button,Select,MenuItem,TextField,InputLabel,FormControl,Input,Checkbox} from '@material-ui/core';
-import Entry from './Entry';
+import {TableContainer,Table,TableCell,TableHead,TableRow,TableBody} from '@material-ui/core';
 import './App.css';
-import { makeStyles } from '@material-ui/core/styles';
+import { withStyles,makeStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 
+// Styling for table cells
+const StyledTableCell = withStyles((theme) => ({
+  head: {
+    backgroundColor: theme.palette.common.black,
+    color: theme.palette.common.white,
+  },
+  body: {
+    fontSize: 12,
+  },
+}))(TableCell);
+
+// Styling for table raws
+const StyledTableRow = withStyles((theme) => ({
+  root: {
+    '&:nth-of-type(odd)': {
+      backgroundColor: theme.palette.action.hover,
+    },
+  },
+}))(TableRow);
+
+// Styling for papar blocks and table
 const useStyles = makeStyles((theme) => ({
+  table: {
+    minWidth: 800,
+  },
   paper1: {
     maxWidth: 1200,
     margin: `${theme.spacing(1)}px auto`,
@@ -49,6 +73,7 @@ function App() {
   const [hours,setHours] = useState("");                              // number of hours per week or per month
   const [frequency,setFrequency] = useState("");                      // number of weeks or months
   const [hoursList,setHoursList] = useState([]);                     // hours list for each entry
+  const [hoursFrequencyList,setHoursFrequencyList] = useState([]);
 
   const [cart, setCart] = useState([]);                              // Cart holds all the entries user made
 
@@ -104,7 +129,6 @@ function App() {
 
   const checkDeleted = ()=>{
      if (deleted==1){
-       alert("Item Deleted");
        setDeleted(0);
      }
   }
@@ -152,34 +176,76 @@ function App() {
     setitemDetails(data);
   }
 
+  const validateDate = ()=>{
+    if (duration>0){
+      return true;
+    } else{
+      alert("Start and End Dates Mismatching");
+      return false;
+    }
+  }
+
+  const getToday = ()=>{
+    var today = new Date();
+    var dd = today.getDate();
+    var mm = today.getMonth()+1; //As January is 0.
+    var yyyy = today.getFullYear();
+
+    if(dd<10) dd='0'+dd;
+    if(mm<10) mm='0'+mm;
+    return yyyy+'-'+mm+'-'+dd;
+  }
+
   // Create word document
   const createWordDoc = async () => {
-    var policies = "";
-    for (var i = 0; i < selectedPolicies.length; i++) {
-      if (selectedPolicies[i]==1){
-        policies = policies.concat(policyList[i]).concat("\n");
-      }
-    }
-
-    fetch('https://therapycare.herokuapp.com/document', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },   
-      body: JSON.stringify({ data: cart, goals: attachedGoalList,description:descriptionList, hours:hoursList, start:startDate, end:endDate, duration:duration, name:participantName, ndis:ndis, sos:sosPrepared, policy:policies, today:"today1" })
-    }).then(response => {
-              response.blob().then(blob => {
-              let url = window.URL.createObjectURL(blob);
-              let a = document.createElement('a');
-              a.href = url;
-              a.download = 'summery.docx';
-              a.click();
-          });
-    });
     
-    setCart([]);
-    setAttachedGoalList([]);
-    setHoursList([]);
+    if (validateDate()){
+      var policies = "";
+      for (var i = 0; i < selectedPolicies.length; i++) {
+        if (selectedPolicies[i]==1){
+          policies = policies.concat(policyList[i]).concat("\n");
+        }
+      }
+
+      fetch('https://therapycare.herokuapp.com/document', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },   
+        body: JSON.stringify({ data: cart, 
+                               goals: attachedGoalList,
+                               description:descriptionList, 
+                               hours:hoursList,
+                               hoursFrequncy: hoursFrequencyList, 
+                               start:startDate, 
+                               end:endDate, 
+                               duration:duration, 
+                               name:participantName, 
+                               ndis:ndis, 
+                               sos:sosPrepared, 
+                               policy:policies, 
+                               today:getToday()})
+      }).then(response => {
+                response.blob().then(blob => {
+                let url = window.URL.createObjectURL(blob);
+                let a = document.createElement('a');
+                a.href = url;
+                a.download = 'summery.docx';
+                a.click();
+            });
+      });
+      
+      setCart([]);
+      setAttachedGoalList([]);
+      setHoursList([]);
+      setHoursFrequencyList([]);
+      setDescriptionList([]);
+      setStartDate("");
+      setEndDate("");
+      setParticipantName("");
+      setNdis("");
+      setSosPrepared("");
+    }
   }
 
   const updateDescription = (event) => {
@@ -202,18 +268,15 @@ function App() {
     setStartDate(event.target.value);
   }
 
-  const updateEndDate = (event) => {
+  const updateEndDate = (event) => { 
+    setEndDate(event.target.value);
     var date1 = new Date(startDate);
     var date2 = new Date(event.target.value);
     var timeDiff = date2.getTime() - date1.getTime();
-    var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24)); 
+    var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+    setDuration(diffDays);
 
-    if (diffDays>0){
-      setEndDate(event.target.value);
-      setDuration(diffDays);
-    }else{
-      alert("Invalid End Date");
-    }
+    
   }
 
   // update when support category is changed from drop down menue
@@ -226,13 +289,38 @@ function App() {
     setSupportItem(event.target.value);
   }
 
+  const validateEntry = () => {
+    if (period=="Hours Per Plan Period"){
+      if (hours==parseInt(hours, 10)){
+        setHoursList(hoursList.concat(hours));
+        setHoursFrequencyList(hoursFrequencyList.concat(hours.toString()));
+        return true
+      }else{
+        alert("Invalid Hours");
+        return false;}
+    } else {
+      if (hours==parseInt(hours, 10)){
+        if (frequency==parseInt(frequency, 10)){
+          var suffix=",M";
+          if (period=="Hours Per Week"){
+            suffix=",W";
+          }
+          var data = hours.toString().concat(",").concat(frequency.toString()).concat(suffix);
+          setHoursList(hoursList.concat(hours*frequency));  
+          setHoursFrequencyList(hoursFrequencyList.concat(data));
+          return true;  
+        }else{
+          alert("Invalid Number of Weeks or Months");
+          return false;
+        }
+      }else{
+        alert("Inavlid Hours");
+        return false;}
+    }
+  }
   // Add entry to the cart
   const addToCart = () => {
-      if (frequency==""){
-        setHoursList(hoursList.concat(hours))
-      }else{
-        setHoursList(hoursList.concat(hours*frequency))           // Total work hours add to hours list
-      }
+    if (validateEntry()){
       setCart(cart.concat([JSON.parse(itemDetails)]));          // Add support item details to the cart
       setAttachedGoalList(attachedGoalList.concat([goals]));    // Add attached goals for the item to global list of attached goals
       setDescriptionList(descriptionList.concat(description));
@@ -241,9 +329,11 @@ function App() {
       setHours("");
       setFrequency(""); 
       setDescription("");  
+    }   
   }
 
-  const deleteFromCart = (index) => {
+  const deleteFromCart = (event) => {
+    var index = event.target.value;
     hoursList.splice(index,1);
     cart.splice(index,1);
     attachedGoalList.splice(index,1);
@@ -308,19 +398,6 @@ function App() {
     
   };
 
-  const ITEM_HEIGHT = 48;
-  const ITEM_PADDING_TOP = 80;
-  const MenuProps = {
-    PaperProps: {
-      style: {
-        maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-        width: 650
-      }
-    },
-    getContentAnchorEl: null
-  
-  };
-
 const updateGoals = (event) => {
   setGoals(event.target.value);
 };
@@ -329,7 +406,15 @@ const addCustomGoal = (event) => {
   setCustomGoal(event.target.value);
 }
 
-const attachCustomGoal = (event) =>{
+const displayGoals = (goals) => {
+  var golasWithSpace = "";
+  for (var i = 0; i < goals.length; i++) {
+    golasWithSpace = golasWithSpace.concat(goals[i]).concat(", ");
+  }
+  return golasWithSpace;
+}
+
+const attachCustomGoal = () =>{
   if (customGoal===""){
     alert("No Goal set");
   }else{
@@ -391,7 +476,7 @@ const attachCustomGoal = (event) =>{
       <Paper className={classes.paper2}>
         <FormControl>
         <InputLabel><b>Add Goals</b></InputLabel>
-        <Select className="dropdown" value={goals} onChange={updateGoals} multiple MenuProps={MenuProps} variant="outlined">
+        <Select className="dropdown" value={goals} onChange={updateGoals} multiple variant="outlined">
             {goalsList.map(name => (
               <MenuItem key={name} value={name}>
                 {name}
@@ -408,7 +493,7 @@ const attachCustomGoal = (event) =>{
     </Paper>
   </Grid>
       <div>
-        <TextField value={description} className="textarea" onChange={updateDescription} variant="outlined" multiline/>
+        <TextField label="Add Description" value={description} className="textarea" onChange={updateDescription} variant="outlined" multiline/>
       </div>
       <br></br><br></br>
       <div>
@@ -416,29 +501,44 @@ const attachCustomGoal = (event) =>{
       </div>
       <br/>
       
-      <div className="policy">
-        {cart.map((item,i) =>(
-          <Entry
-          supportCategory={item.SupportCategoryName}
-          supportItemNumber={item.SupportItemNumber}
-          SupportItemName={item.SupportItemName}
-          goals={attachedGoalList[i]}
-          price={item.Price*hoursList[i]}
-          index={i}
-          deleteFunction={deleteFromCart}
-          />
-        ))}
-      </div>  
-  
+      <TableContainer className={classes.paper1}>
+      <Table className={classes.table} aria-label="customized table">
+        <TableHead>
+          <TableRow>
+            <StyledTableCell align="center">Support Category Name</StyledTableCell>
+            <StyledTableCell align="center">Support Item Number</StyledTableCell>
+            <StyledTableCell align="center">Support ItemName</StyledTableCell>
+            <StyledTableCell align="center">Goals</StyledTableCell>
+            <StyledTableCell align="center">Description</StyledTableCell>
+            <StyledTableCell align="center">Price</StyledTableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {cart.map((item,i) => (
+            <StyledTableRow>
+              <StyledTableCell align="center">{item.SupportCategoryName}</StyledTableCell>
+              <StyledTableCell align="center">{item.SupportItemNumber}</StyledTableCell>
+              <StyledTableCell align="center">{item.SupportItemName}</StyledTableCell>
+              <StyledTableCell align="center">{displayGoals(attachedGoalList[i])}</StyledTableCell>
+              <StyledTableCell align="center">{descriptionList[i]}</StyledTableCell>
+              <StyledTableCell align="center">{item.Price*hoursList[i]}</StyledTableCell>
+              <br></br><Button value={i} onClick={deleteFromCart} variant="contained" color="secondary">Drop</Button>
+            </StyledTableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+   
       {policyList.map((policy,i)=>(
         <div className="policy">
-          <label>{policy}</label>
+        <li><label>{policy}</label>
           <Checkbox
           value={i}
           onChange={policyChange}
           color="primary"
           inputProps={{ 'aria-label': 'secondary checkbox' }}
           />
+        </li>
         </div>  
       ))}
       <br></br>
