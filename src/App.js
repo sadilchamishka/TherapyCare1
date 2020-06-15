@@ -461,14 +461,14 @@ function App() {
         )
     }else if (period=="Hours Per Month"){
       return (
-        <div align="right">
+        <div class="hour" align="right">
           <TextField value={hours} label="Number of Hours" onChange={updateHours}></TextField> &emsp;
           <TextField value={frequency} label="Number of Months"  onChange={updateFrequency}></TextField>
         </div>
         )
     }else if (period=="Hours Per Plan Period"){
       return (
-        <div align="right">
+        <div class="hour" align="right">
           <TextField value={hours} label="Number of Hours" onChange={updateHours}></TextField>
         </div>
         )
