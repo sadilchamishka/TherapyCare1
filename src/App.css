@@ -13,11 +13,16 @@
   text-align: justify;
 }
 
+.hour {
+  position: absolute;
+  top: 54%;
+  right: 20%;
+}
 
 .dropdown {
   width: 450px;
   height: 30px;
-  margin: 15px;
+  margin: 20px;
 }
 
 .goal {
@@ -26,14 +31,18 @@
 }
 
 .textfield {
+  position: absolute;
+  right: 150%;
+  height: 30px;
+}
+
+.date {
   height: 30px;
   margin: 15px;
 }
 
 .textarea {
-  height: 20px;
-  width: 500px;
-  margin: 20px;
+  width: 600px;
 }
 
 .d {

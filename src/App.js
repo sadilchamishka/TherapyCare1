@@ -1,10 +1,26 @@
 import React, { useEffect, useState } from 'react';
-import {Button,Select,MenuItem,TextField,InputLabel,FormControl,Input,Checkbox} from '@material-ui/core';
+import {Button,Select,MenuItem,TextField,InputLabel,FormControl,Input,Checkbox,Icon} from '@material-ui/core';
 import {TableContainer,Table,TableCell,TableHead,TableRow,TableBody} from '@material-ui/core';
+import DeleteIcon from '@material-ui/icons/Delete';
+import ReactMultiSelectCheckboxes from 'react-multiselect-checkboxes';
+
 import './App.css';
-import { withStyles,makeStyles } from '@material-ui/core/styles';
+import {withStyles,makeStyles} from '@material-ui/core/styles';
+import { green } from '@material-ui/core/colors';
+
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
+
+const ColorButton = withStyles((theme) => ({
+  root: {
+    color: theme.palette.getContrastText(green[700]),
+    backgroundColor: green[400],
+    '&:hover': {
+      backgroundColor: green[800],
+    },
+  },
+}))(Button);
+
 
 // Styling for table cells
 const StyledTableCell = withStyles((theme) => ({
@@ -26,8 +42,28 @@ const StyledTableRow = withStyles((theme) => ({
   },
 }))(TableRow);
 
+
+const GreenCheckbox = withStyles({
+  root: {
+    color: green[400],
+    '&$checked': {
+      color: green[600],
+    },
+  },
+  checked: {},
+})((props) => <Checkbox color="default" {...props} />);
+
 // Styling for papar blocks and table
 const useStyles = makeStyles((theme) => ({
+  icon: {
+    '& > span': {
+      margin: theme.spacing(2),
+    },
+  },
+
+  margin: {
+    margin: theme.spacing(1),
+  },
   table: {
     minWidth: 800,
   },
@@ -39,7 +75,7 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.text.secondary,
   },
   paper2: {
-    maxWidth: 750,
+    maxWidth: 700,
     margin: `${theme.spacing(1)}px auto`,
     padding: theme.spacing(2),
     textAlign: 'left',
@@ -56,6 +92,13 @@ const useStyles = makeStyles((theme) => ({
 
 function App() {
   const classes = useStyles();
+
+  const [setting, setSetting] = useState(false);
+  const [showTable, setShowTable] = useState(0);
+
+  const [options, setOptions] = useState([]);
+  const [value, setValue] = useState(['']);
+
 
   const [supportCategoryList, setSupportCategoryList] = useState([]); // List of support category names from back end
   const [supportCategory, setSupportCategory] = useState('');         // selected current support category
@@ -79,6 +122,7 @@ function App() {
 
   const [goals, setGoals] = useState([]);                            // User selected goals for a support item
   const [customGoal,setCustomGoal] = useState("");                   // Custom goal the user wants attach
+  const [customGoalList,setCustomGoalList] = useState([]);
   const [attachedGoalList,setAttachedGoalList] = useState([]);       // All the goals user has attached for each support items
 
   const [description, setDescription] = useState("");
@@ -140,11 +184,20 @@ function App() {
     setSupportCategoryList(data.SupportCategoryName);
   };
 
+
   // Fetch goals from backend
   const getGoalsList = async ()=>{
     const response = await fetch("https://therapycare.herokuapp.com/goals");
     const data = await response.json();
     setgoalsList(data.goals);
+
+    var dict = [];
+
+    data.goals.map(goal=>{
+      dict.push({label:goal,value:goal});
+    });
+
+    setOptions(dict);
   };
 
   // Fetch policies from backend
@@ -200,6 +253,9 @@ function App() {
   const createWordDoc = async () => {
     
     if (validateDate()){
+
+      setShowTable(0);
+
       var policies = "";
       for (var i = 0; i < selectedPolicies.length; i++) {
         if (selectedPolicies[i]==1){
@@ -321,20 +377,33 @@ function App() {
   // Add entry to the cart
   const addToCart = () => {
     if (validateEntry()){
+
+      setShowTable(1);
+
+      var allgoals = []
+      value.map(g=>{
+        allgoals.push(g.label);
+      });
+
+      customGoalList.map(g=>{
+        allgoals.push(g);
+      });
+
       setCart(cart.concat([JSON.parse(itemDetails)]));          // Add support item details to the cart
-      setAttachedGoalList(attachedGoalList.concat([goals]));    // Add attached goals for the item to global list of attached goals
+      setAttachedGoalList(attachedGoalList.concat([allgoals]));    // Add attached goals for the item to global list of attached goals
       setDescriptionList(descriptionList.concat(description));
+
       // Clear variables after successfully adding to the cart
-      setGoals([]);   
+      setValue([]);
+      setCustomGoalList([]);   
       setHours("");
       setFrequency(""); 
       setDescription("");  
     }   
   }
 
-  const deleteFromCart = (event) => {
-    var index = event;
-    alert(index);
+  const deleteFromCart = (index) => {
+
     hoursList.splice(index,1);
     cart.splice(index,1);
     attachedGoalList.splice(index,1);
@@ -347,6 +416,12 @@ function App() {
     setDescriptionList(descriptionList);
     setHoursFrequencyList(hoursFrequencyList);
 
+    setDeleted(1);
+  }
+
+  const deleteCustomGoalList = (index) => {
+    customGoalList.splice(index,1);
+    setCustomGoalList(customGoalList);
     setDeleted(1);
   }
 
@@ -379,21 +454,21 @@ function App() {
   const timeDiv = () => {
     if (period=="Hours Per Week"){
       return (
-        <div>
+        <div class="hour" align="right">
           <TextField value={hours} label="Number of Hours" onChange={updateHours}></TextField>  &emsp;
           <TextField value={frequency} label="Number of Weeks" onChange={updateFrequency}></TextField>
         </div>
         )
     }else if (period=="Hours Per Month"){
       return (
-        <div>
+        <div align="right">
           <TextField value={hours} label="Number of Hours" onChange={updateHours}></TextField> &emsp;
           <TextField value={frequency} label="Number of Months"  onChange={updateFrequency}></TextField>
         </div>
         )
     }else if (period=="Hours Per Plan Period"){
       return (
-        <div>
+        <div align="right">
           <TextField value={hours} label="Number of Hours" onChange={updateHours}></TextField>
         </div>
         )
@@ -401,8 +476,32 @@ function App() {
     
   };
 
-const updateGoals = (event) => {
-  setGoals(event.target.value);
+  const updateSetting = () =>{
+    setSetting(true);
+  }
+
+  const viewSetting = () =>{
+    if (setting){
+      return (
+        <div>
+          <Input type="file" id="f1" variant="contained" color="primary"></Input>
+          <ColorButton  onClick={addGoalFile} variant="contained" color="primary"> Add goals file </ColorButton>
+          &emsp;
+          <Input type="file" id="f2" variant="contained" color="primary"></Input>
+          <ColorButton onClick={addData} variant="contained" color="primary"> Add support items </ColorButton>
+        </div>
+      )
+    } else{
+      return (
+        <div align="right">
+          <Button onClick={updateSetting} align="right"><i class="fa fa-gear" style = {{fontSize:40}}></i></Button>
+        </div>
+      )
+    }
+  }
+
+const updateGoals = (opt) => {
+  setValue(opt);
 };
 
 const addCustomGoal = (event) => {
@@ -421,90 +520,123 @@ const attachCustomGoal = () =>{
   if (customGoal===""){
     alert("No Goal set");
   }else{
-    setGoals(goals.concat(customGoal));
-    alert("Successfully attached custom goal: ".concat(customGoal));
+    setCustomGoalList(customGoalList.concat(customGoal));
     setCustomGoal("");
   }
 }
 
+const addGoalFile = () =>{
+  let file = document.getElementById("f1").files[0];
+  let formData = new FormData();
+
+  formData.append("file", file);
+
+  fetch('https://therapycare.herokuapp.com/updategoals', {method: "POST", body: formData});
+  setSetting(false);
+}
+
+const addData = () =>{
+  let file = document.getElementById("f2").files[0];
+  let formData = new FormData();
+
+  formData.append("file", file);
+
+  fetch('https://therapycare.herokuapp.com/updatedata', {method: "POST", body: formData});
+  setSetting(false);
+}
+
   return (
     <div className="App">
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
     <br></br>
+    {viewSetting()}
     <Grid>
         <Paper className={classes.paper1}>
           <TextField value={participantName} label="Participant Name" onChange={updateParticipantName}></TextField> &emsp;
            <TextField value={ndis} label="NDIS number" onChange={updateNDIS}></TextField> &emsp;
           <TextField value={sosPrepared} label="SOS Prepared by" onChange={updatePreparedBy}></TextField> &emsp;
           <label>Start Date</label>
-          <Input value={startDate} className="textfield" type="date" onChange={updateStartDate}/>  &emsp;
+          <Input value={startDate} className="date" type="date" onChange={updateStartDate}/>  &emsp;
           <label>End Date</label>
-          <Input value={endDate} className="textfield" type="date" onChange={updateEndDate}/> &emsp;
+          <Input value={endDate} className="date" type="date" onChange={updateEndDate}/> &emsp;
         </Paper>
     </Grid>
     <br></br> 
     <Grid>
       <Paper className={classes.paper1}>
-        <FormControl className="d">
-            <InputLabel><b>Select Support Category :</b></InputLabel>
+      <div align="center">
+      <FormControl className="d">
+            <label><b>Select Support Category :</b></label>
             <Select className="dropdown" value={supportCategory} onChange={supportCategoryChange} variant="outlined">
             {supportCategoryList.map(category =>(
               <MenuItem value={category}>{category}</MenuItem>
             ))}
             </Select>
-        </FormControl>
-
-        <FormControl>
-          <InputLabel><b>Select Support Item :</b></InputLabel>
+        </FormControl>        
+      <FormControl>
+            <label><b>Select Support Item :</b></label>
             <Select className="dropdown" value={supportItem} onChange={supportItemChange} variant="outlined">
             {supportItemList.map(item =>(
               <MenuItem className="special" value={item}>{item}</MenuItem>
             ))}
             </Select>
-        </FormControl>
-      
+         <br></br>   
+      </FormControl>
+      </div>
+      <div align="center">
         <FormControl>
-        <InputLabel><b>Select Period:</b></InputLabel>
           <Select className="textfield" onChange={setPeriodCategory} value={period} variant="outlined">
             <MenuItem className="special" value="Hours Per Week">Hours Per Week</MenuItem>
             <MenuItem className="special" value="Hours Per Month">Hours Per Month</MenuItem>
             <MenuItem className="special" value="Hours Per Plan Period">Hours Per Plan Period</MenuItem>
           </Select>
         </FormControl>
-
+      </div>
       {timeDiv()}
     </Paper>
   </Grid>
   <br></br> 
   <Grid>
       <Paper className={classes.paper2}>
+        <label><b>Add Goals</b></label> &emsp; 
         <FormControl>
-        <InputLabel><b>Add Goals</b></InputLabel>
-        <Select className="dropdown" value={goals} onChange={updateGoals} multiple variant="outlined">
-            {goalsList.map(name => (
-              <MenuItem key={name} value={name}>
-                {name}
-              </MenuItem>
-            ))}
-          </Select>
+          <ReactMultiSelectCheckboxes  width={502} value={value} onChange={updateGoals} options={options} />
+          <br></br>
         </FormControl>
       <div>
         <TextField className="textarea" label="Add Custom Goals" onChange={addCustomGoal} value={customGoal} variant="outlined" multiline></TextField> &emsp;
-        <Button onClick={attachCustomGoal} variant="outlined" color="primary"> Attach Custom Goal </Button>
-      </div>
+        <Button className={classes.icon} align="right"><Icon onClick={attachCustomGoal} style={{ color: green[500],fontSize: 30 }}>add_circle</Icon></Button>
         
-      <br></br><br></br>
+        {customGoalList.map((item,i) => (
+            <div>
+              <Button value={i} onClick={()=>deleteCustomGoalList(i)}><DeleteIcon /></Button>
+              <label>{item}</label>
+            </div>   
+        ))}
+        </div>
+      <br></br>
     </Paper>
   </Grid>
+  <br></br>
+  <Grid>
+      <Paper className={classes.paper2}>
+        <div>
+          <TextField label="Add Description" value={description} className="textarea" onChange={updateDescription} variant="outlined" multiline/>
+        </div>
+      </Paper>
+  </Grid>
+      <br></br> 
       <div>
-        <TextField label="Add Description" value={description} className="textarea" onChange={updateDescription} variant="outlined" multiline/>
-      </div>
-      <br></br><br></br>
-      <div>
-        <Button onClick={addToCart} variant="contained" color="primary"> Add </Button>
-      </div>
+        <ColorButton onClick={addToCart} variant="contained" color="primary"> Add Entry </ColorButton>
+        </div>
       <br/>
       
-      <TableContainer className={classes.paper1}>
+      {showTable == 0 ? (
+        <div></div>
+      ) : (
+        <TableContainer className={classes.paper1}>
       <Table className={classes.table} aria-label="customized table">
         <TableHead>
           <TableRow>
@@ -525,17 +657,18 @@ const attachCustomGoal = () =>{
               <StyledTableCell align="center">{displayGoals(attachedGoalList[i])}</StyledTableCell>
               <StyledTableCell align="center">{descriptionList[i]}</StyledTableCell>
               <StyledTableCell align="center">{item.Price*hoursList[i]}</StyledTableCell>
-              <br></br><Button value={i} onClick={()=>deleteFromCart(i)} variant="contained" color="secondary">Drop</Button>
+              <Button value={i} onClick={()=>deleteFromCart(i)}><DeleteIcon /></Button>
             </StyledTableRow>
           ))}
         </TableBody>
       </Table>
     </TableContainer>
-   
+      )}
+
       {policyList.map((policy,i)=>(
         <div className="policy">
         <li><label>{policy}</label>
-          <Checkbox
+          <GreenCheckbox
           value={i}
           onChange={policyChange}
           color="primary"
@@ -546,7 +679,7 @@ const attachCustomGoal = () =>{
       ))}
       <br></br>
       <div>
-      <Button onClick={createWordDoc} variant="contained" color="primary"> Submit </Button>
+      <ColorButton onClick={createWordDoc} variant="contained" color="primary"> Submit </ColorButton>
       </div>
       <br></br>
     </div>
