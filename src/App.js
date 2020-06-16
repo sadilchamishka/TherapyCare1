@@ -454,21 +454,21 @@ function App() {
   const timeDiv = () => {
     if (period=="Hours Per Week"){
       return (
-        <div class="hour" align="right">
+        <div align="right">
           <TextField value={hours} label="Number of Hours" onChange={updateHours}></TextField>  &emsp;
           <TextField value={frequency} label="Number of Weeks" onChange={updateFrequency}></TextField>
         </div>
         )
     }else if (period=="Hours Per Month"){
       return (
-        <div class="hour" align="right">
+        <div align="right">
           <TextField value={hours} label="Number of Hours" onChange={updateHours}></TextField> &emsp;
           <TextField value={frequency} label="Number of Months"  onChange={updateFrequency}></TextField>
         </div>
         )
     }else if (period=="Hours Per Plan Period"){
       return (
-        <div class="hour" align="right">
+        <div align="right">
           <TextField value={hours} label="Number of Hours" onChange={updateHours}></TextField>
         </div>
         )
@@ -587,14 +587,14 @@ const addData = () =>{
       </div>
       <div align="center">
         <FormControl>
-          <Select className="textfield" onChange={setPeriodCategory} value={period} variant="outlined">
+          <Select className="textfield1" onChange={setPeriodCategory} value={period} variant="outlined">
             <MenuItem className="special" value="Hours Per Week">Hours Per Week</MenuItem>
             <MenuItem className="special" value="Hours Per Month">Hours Per Month</MenuItem>
             <MenuItem className="special" value="Hours Per Plan Period">Hours Per Plan Period</MenuItem>
           </Select>
+          {timeDiv()}
         </FormControl>
       </div>
-      {timeDiv()}
     </Paper>
   </Grid>
   <br></br> 

@@ -13,12 +13,6 @@
   text-align: justify;
 }
 
-.hour {
-  position: absolute;
-  top: 54%;
-  right: 20%;
-}
-
 .dropdown {
   width: 450px;
   height: 30px;
@@ -30,8 +24,12 @@
   margin: 10px;
 }
 
+.textfield1 {
+  width: 200px;
+  height: 30px;
+}
+
 .textfield {
-  position: absolute;
   right: 150%;
   height: 30px;
 }
