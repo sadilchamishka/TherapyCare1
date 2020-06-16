@@ -454,21 +454,21 @@ function App() {
   const timeDiv = () => {
     if (period=="Hours Per Week"){
       return (
-        <div align="right">
+        <div align="center">
           <TextField value={hours} label="Number of Hours" onChange={updateHours}></TextField>  &emsp;
           <TextField value={frequency} label="Number of Weeks" onChange={updateFrequency}></TextField>
         </div>
         )
     }else if (period=="Hours Per Month"){
       return (
-        <div align="right">
+        <div align="center">
           <TextField value={hours} label="Number of Hours" onChange={updateHours}></TextField> &emsp;
           <TextField value={frequency} label="Number of Months"  onChange={updateFrequency}></TextField>
         </div>
         )
     }else if (period=="Hours Per Plan Period"){
       return (
-        <div align="right">
+        <div align="center">
           <TextField value={hours} label="Number of Hours" onChange={updateHours}></TextField>
         </div>
         )
@@ -586,15 +586,13 @@ const addData = () =>{
       </FormControl>
       </div>
       <div align="center">
-        <FormControl>
           <Select className="textfield1" onChange={setPeriodCategory} value={period} variant="outlined">
             <MenuItem className="special" value="Hours Per Week">Hours Per Week</MenuItem>
             <MenuItem className="special" value="Hours Per Month">Hours Per Month</MenuItem>
             <MenuItem className="special" value="Hours Per Plan Period">Hours Per Plan Period</MenuItem>
           </Select>
-          {timeDiv()}
-        </FormControl>
       </div>
+      {timeDiv()}
     </Paper>
   </Grid>
   <br></br> 
@@ -611,7 +609,7 @@ const addData = () =>{
         
         {customGoalList.map((item,i) => (
             <div>
-              <Button value={i} onClick={()=>deleteCustomGoalList(i)}><DeleteIcon /></Button>
+              <Button value={i} onClick={()=>deleteCustomGoalList(i)}><DeleteIcon color="secondary"/></Button>
               <label>{item}</label>
             </div>   
         ))}
@@ -657,7 +655,7 @@ const addData = () =>{
               <StyledTableCell align="center">{displayGoals(attachedGoalList[i])}</StyledTableCell>
               <StyledTableCell align="center">{descriptionList[i]}</StyledTableCell>
               <StyledTableCell align="center">{item.Price*hoursList[i]}</StyledTableCell>
-              <Button value={i} onClick={()=>deleteFromCart(i)}><DeleteIcon /></Button>
+              <Button value={i} onClick={()=>deleteFromCart(i)}><DeleteIcon color="secondary"/></Button>
             </StyledTableRow>
           ))}
         </TableBody>
