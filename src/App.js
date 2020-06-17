@@ -416,6 +416,10 @@ function App() {
     setDescriptionList(descriptionList);
     setHoursFrequencyList(hoursFrequencyList);
 
+    if (cart.length==0){
+      setShowTable(0);
+    }
+
     setDeleted(1);
   }
 
