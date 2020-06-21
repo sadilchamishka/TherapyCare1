@@ -252,7 +252,6 @@ function App() {
 
   // Create word document
   const createWordDoc = async () => {
-    console.log(sigCanvas.getCanvas().toDataURL('image/png'));
     if (validateDate()){
 
       setShowTable(0);
@@ -269,19 +268,20 @@ function App() {
         headers: {
           'Content-Type': 'application/json'
         },   
-        body: JSON.stringify({ data: cart, 
-                                        goals: attachedGoalList,
-                                        description:descriptionList, 
-                                        hours:hoursList,
-                                        hoursFrequncy: hoursFrequencyList, 
-                                        start:startDate, 
-                                        end:endDate, 
-                                        duration:duration, 
-                                        name:participantName, 
-                                        ndis:ndis, 
-                                        sos:sosPrepared, 
-                                        policy:policies, 
-                                        today:getToday()})
+        body: JSON.stringify({  data: cart, 
+                                goals: attachedGoalList,
+                                description:descriptionList, 
+                                hours:hoursList,
+                                hoursFrequncy: hoursFrequencyList, 
+                                start:startDate, 
+                                end:endDate, 
+                                duration:duration, 
+                                name:participantName, 
+                                ndis:ndis, 
+                                sos:sosPrepared, 
+                                policy:policies, 
+                                today:getToday(),
+                                img:sigCanvas.getCanvas().toDataURL()})
       }).then(response => {
                 response.blob().then(blob => {
                 let url = window.URL.createObjectURL(blob);
@@ -687,11 +687,11 @@ const clearSign = () => {
         </div>  
       ))}
       <br></br>
-      <SignatureCanvas penColor='green' backgroundColor={'rgba(255,255,255,3)'}
+      <SignatureCanvas penColor='black' backgroundColor={'rgba(255,255,255,3)'}
         canvasProps={{width: 500, height: 200, className: 'sigCanvas'}}
         ref={(ref) => { sigCanvas = ref }}
         />
-      <button onClick={clearSign}>Clear</button>
+      <ColorButton onClick={clearSign} variant="contained" color="primary"> Clear </ColorButton>
       <div>
       <br></br>
       <ColorButton onClick={createWordDoc} variant="contained" color="primary"> Submit </ColorButton>
