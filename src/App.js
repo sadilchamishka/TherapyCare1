@@ -3,7 +3,6 @@ import {Button,Select,MenuItem,TextField,InputLabel,FormControl,Input,Checkbox,I
 import {TableContainer,Table,TableCell,TableHead,TableRow,TableBody} from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ReactMultiSelectCheckboxes from 'react-multiselect-checkboxes';
-import SignatureCanvas from 'react-signature-canvas'
 
 import './App.css';
 import {withStyles,makeStyles} from '@material-ui/core/styles';
@@ -11,6 +10,8 @@ import { green } from '@material-ui/core/colors';
 
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
+
+const serverURL = "https://therapycare.herokuapp.com/";
 
 const ColorButton = withStyles((theme) => ({
   root: {
@@ -180,7 +181,7 @@ function App() {
 
   // Fetch support category names from back end
   const getSupportCategoryList = async ()=>{
-    const response = await fetch("https://therapycare.herokuapp.com/supportcategoryname");
+    const response = await fetch(serverURL.concat("supportcategoryname"));
     const data = await response.json();
     setSupportCategoryList(data.SupportCategoryName);
   };
@@ -188,22 +189,22 @@ function App() {
 
   // Fetch goals from backend
   const getGoalsList = async ()=>{
-    const response = await fetch("https://therapycare.herokuapp.com/goals");
+    const response = await fetch(serverURL.concat("goals"));
+
     const data = await response.json();
     setgoalsList(data.goals);
 
     var dict = [];
 
     data.goals.map(goal=>{
-      dict.push({label:goal,value:goal});
+      dict.push({label:Object.keys(goal),value:goal[Object.keys(goal)[0]]});
     });
 
     setOptions(dict);
   };
-
   // Fetch policies from backend
   const getPolicyList = async ()=>{
-    const response = await fetch("https://therapycare.herokuapp.com/policy");
+    const response = await fetch(serverURL.concat("policy"));
     const data = await response.json();
     setPolicyList(data.policy);
     var i;
@@ -218,14 +219,14 @@ function App() {
 
   // Fetch supoort items corresponding to the support categroy from the back end
   const getSupportItemList = async ()=>{
-    const response = await fetch(`https://therapycare.herokuapp.com/supportitemname?supportcategoryname=${supportCategory}`);
+    const response = await fetch(serverURL.concat(`supportitemname?supportcategoryname=${supportCategory}`));
     const data = await response.json();
     setSupportItemList(data.SupportItem);
   };
 
   // Fetch support item details for corresponding item from the back end
   const getSupportItemDetails = async ()=>{
-    const response = await fetch(`https://therapycare.herokuapp.com/supportitemdetails?supportitem=${supportItem}`);
+    const response = await fetch(serverURL.concat(`supportitemdetails?supportitem=${supportItem}&supportcategoryname=${supportCategory}`));
     const data = await response.text();
     setitemDetails(data);
   }
@@ -263,7 +264,7 @@ function App() {
         }
       }
 
-      fetch('https://therapycare.herokuapp.com/document', {
+      fetch(serverURL.concat("document"), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -280,8 +281,7 @@ function App() {
                                 ndis:ndis, 
                                 sos:sosPrepared, 
                                 policy:policies, 
-                                today:getToday(),
-                                img:sigCanvas.getCanvas().toDataURL()})
+                                today:getToday()})
       }).then(response => {
                 response.blob().then(blob => {
                 let url = window.URL.createObjectURL(blob);
@@ -302,6 +302,7 @@ function App() {
       setParticipantName("");
       setNdis("");
       setSosPrepared("");
+      setDuration(0);
     }
   }
 
@@ -323,6 +324,11 @@ function App() {
 
   const updateStartDate = (event) => {
     setStartDate(event.target.value);
+    var date1 = new Date(endDate);
+    var date2 = new Date(event.target.value);
+    var timeDiff = date1.getTime() - date2.getTime();
+    var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+    setDuration(diffDays);
   }
 
   const updateEndDate = (event) => { 
@@ -348,7 +354,7 @@ function App() {
 
   const validateEntry = () => {
     if (period=="Hours Per Plan Period"){
-      if (hours==parseInt(hours, 10)){
+      if (hours/1==hours){
         setHoursList(hoursList.concat(hours));
         setHoursFrequencyList(hoursFrequencyList.concat(hours.toString()));
         return true
@@ -356,7 +362,7 @@ function App() {
         alert("Invalid Hours");
         return false;}
     } else {
-      if (hours==parseInt(hours, 10)){
+      if (hours/1==hours){
         if (frequency==parseInt(frequency, 10)){
           var suffix=",M";
           if (period=="Hours Per Week"){
@@ -383,7 +389,7 @@ function App() {
 
       var allgoals = []
       value.map(g=>{
-        allgoals.push(g.label);
+        allgoals.push(g.value);
       });
 
       customGoalList.map(g=>{
@@ -536,7 +542,7 @@ const addGoalFile = () =>{
 
   formData.append("file", file);
 
-  fetch('https://therapycare.herokuapp.com/updategoals', {method: "POST", body: formData});
+  fetch(serverURL.concat("updategoals"), {method: "POST", body: formData});
   setSetting(false);
 }
 
@@ -545,20 +551,13 @@ const addData = () =>{
   let formData = new FormData();
 
   formData.append("file", file);
-
-  fetch('https://therapycare.herokuapp.com/updatedata', {method: "POST", body: formData});
+  
+  fetch(serverURL.concat("updatedata"), {method: "POST", body: formData});
   setSetting(false);
-}
-
-let sigCanvas;
-
-const clearSign = () => {
-  sigCanvas.clear();
 }
 
   return (
     <div className="App">
-
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
     <br></br>
@@ -687,11 +686,6 @@ const clearSign = () => {
         </div>  
       ))}
       <br></br>
-      <SignatureCanvas penColor='black' backgroundColor={'rgba(255,255,255,3)'}
-        canvasProps={{width: 500, height: 200, className: 'sigCanvas'}}
-        ref={(ref) => { sigCanvas = ref }}
-        />
-      <ColorButton onClick={clearSign} variant="contained" color="primary"> Clear </ColorButton>
       <div>
       <br></br>
       <ColorButton onClick={createWordDoc} variant="contained" color="primary"> Submit </ColorButton>
