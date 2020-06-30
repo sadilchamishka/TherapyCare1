@@ -1,5 +1,4 @@
 {
-  "homepage": "http://sadilchamishka.github.io/TherapyCareFront",
   "name": "therapycare",
   "version": "0.1.0",
   "private": true,
@@ -10,17 +9,13 @@
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.5.0",
     "@testing-library/user-event": "^7.2.1",
-    "gh-pages": "^2.2.0",
     "material-ui": "^1.0.0-beta.47",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-multiselect-checkboxes": "^0.1.1",
-    "react-scripts": "3.4.1",
-    "react-signature-canvas": "^1.0.3"
+    "react-scripts": "3.4.1"
   },
   "scripts": {
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -b master -d build",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
