@@ -1,4 +1,6 @@
 var express = require('express');
+const path = require('path');
+
 var app = express();
 
 if (process.env.NODE_ENV === 'production') {
