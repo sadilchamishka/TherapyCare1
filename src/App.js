@@ -500,6 +500,9 @@ function App() {
           &emsp;
           <Input type="file" id="f2" variant="contained" color="primary"></Input>
           <ColorButton onClick={addData} variant="contained" color="primary"> Add support items </ColorButton>
+          &emsp;
+          <Input type="file" id="f3" variant="contained" color="primary"></Input>
+          <ColorButton onClick={addPolicies} variant="contained" color="primary"> Add policies </ColorButton>
         </div>
       )
     } else{
@@ -553,6 +556,16 @@ const addData = () =>{
   formData.append("file", file);
   
   fetch(serverURL.concat("updatedata"), {method: "POST", body: formData});
+  setSetting(false);
+}
+
+const addPolicies = () =>{
+  let file = document.getElementById("f3").files[0];
+  let formData = new FormData();
+
+  formData.append("file", file);
+  
+  fetch(serverURL.concat("updatepolicy"), {method: "POST", body: formData});
   setSetting(false);
 }
 
