@@ -226,9 +226,11 @@ function App() {
 
   // Fetch support item details for corresponding item from the back end
   const getSupportItemDetails = async ()=>{
-    const response = await fetch(serverURL.concat(`supportitemdetails?supportitem=${supportItem}&supportcategoryname=${supportCategory}`));
-    const data = await response.text();
-    setitemDetails(data);
+    if (typeof supportItem !== 'undefined' && supportItem!=''){
+      const response = await fetch(serverURL.concat(`supportitemdetails?supportitem=${supportItem}&supportcategoryname=${supportCategory}`));
+      const data = await response.text();
+      setitemDetails(data);
+    } 
   }
 
   const validateDate = ()=>{
@@ -260,7 +262,7 @@ function App() {
       var policies = "";
       for (var i = 0; i < selectedPolicies.length; i++) {
         if (selectedPolicies[i]==1){
-          policies = policies.concat(policyList[i]).concat("\n");
+          policies = policies.concat("*").concat(policyList[i]).concat("\n");
         }
       }
 
@@ -488,7 +490,7 @@ function App() {
   };
 
   const updateSetting = () =>{
-    setSetting(true);
+    setSetting(!setting);
   }
 
   const viewSetting = () =>{
@@ -503,6 +505,10 @@ function App() {
           &emsp;
           <Input type="file" id="f3" variant="contained" color="primary"></Input>
           <ColorButton onClick={addPolicies} variant="contained" color="primary"> Add policies </ColorButton>
+
+          <div align="right">
+            <Button onClick={updateSetting} align="right"><i class="fa fa-gear" style = {{fontSize:40}}></i></Button>
+          </div>
         </div>
       )
     } else{
@@ -546,7 +552,6 @@ const addGoalFile = () =>{
   formData.append("file", file);
 
   fetch(serverURL.concat("updategoals"), {method: "POST", body: formData});
-  setSetting(false);
 }
 
 const addData = () =>{
@@ -556,7 +561,6 @@ const addData = () =>{
   formData.append("file", file);
   
   fetch(serverURL.concat("updatedata"), {method: "POST", body: formData});
-  setSetting(false);
 }
 
 const addPolicies = () =>{
@@ -566,7 +570,6 @@ const addPolicies = () =>{
   formData.append("file", file);
   
   fetch(serverURL.concat("updatepolicy"), {method: "POST", body: formData});
-  setSetting(false);
 }
 
   return (
