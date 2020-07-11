@@ -262,7 +262,7 @@ function App() {
       var policies = "";
       for (var i = 0; i < selectedPolicies.length; i++) {
         if (selectedPolicies[i]==1){
-          policies = policies.concat("> ").concat(policyList[i]).concat("\n\n");
+          policies = policies.concat(" ").concat(policyList[i]).concat("\n\n");
         }
       }
 
