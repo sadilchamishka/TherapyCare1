@@ -14,9 +14,9 @@ code {
 }
 
 .img {
-  top: 10px;
+  top: 0px;
   right:300px;
   width: 100px;
-  height: 70px;
+  height: 75px;
   position: absolute;
 }
