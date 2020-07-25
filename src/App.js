@@ -47,7 +47,6 @@ function App() {
 
   const classes = useStyles();
 
-  const [start, setStart] = useState(0);
   const [role, setRole] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -61,6 +60,8 @@ function App() {
   }
 
   const logIn = async () => {
+    console.log(email);
+    console.log(password);
     const response = await fetch(serverURL.concat("login"), {
       method: 'POST',
       headers: {
@@ -73,7 +74,7 @@ function App() {
 
     setEmail("");
     setPassword("");
-    
+
     const data = await response.text();
     console.log(data);
     if (data=="Invalid"){
@@ -141,6 +142,7 @@ function App() {
             onChange = {updateEmail}
             autoComplete="email"
             autoFocus
+            value={email}
           />
           <TextField
             variant="outlined"
@@ -153,6 +155,7 @@ function App() {
             id="password"
             onChange = {updatePassword}
             autoComplete="current-password"
+            value={password}
           />
     
           <Button
