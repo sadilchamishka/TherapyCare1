@@ -546,10 +546,17 @@ const addPolicies = () =>{
   fetch(serverURL.concat("updatepolicy"), {method: "POST", body: formData});
 }
 
+const logout = ()=>{
+  localStorage.removeItem("authkey");
+  window.location.reload();
+}
+
   return (
     <div className="Dashboard">
     <br></br>
-    {viewSetting()}
+  
+    <div align="right"> <ColorButton onClick={logout} variant="contained" color="primary"> Logout </ColorButton> </div>
+      {viewSetting()}
     <Grid>
         <Paper className={classes.paper1}>
     &emsp;<TextField value={participantName} label="Participant Name" onChange={updateParticipantName}></TextField> &emsp;

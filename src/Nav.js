@@ -12,7 +12,8 @@ function Nav() {
         <nav>
             <ul className="nav-links">
                 <Link style={navStyle} to="/"> <li>Home</li> </Link> 
-                <Link style={navStyle} to="/register"> <li>Register User</li> </Link> 
+                <Link style={navStyle} to="/register"> <li>Register User</li> </Link>
+                <Link style={navStyle} to="/update"> <li>Update User</li> </Link> 
             </ul>
         </nav>
     )

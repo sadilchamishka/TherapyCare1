@@ -1,16 +1,12 @@
-import React from 'react';
+import React, {useState } from 'react';
 import Avatar from '@material-ui/core/Avatar';
-import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import TextField from '@material-ui/core/TextField';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
-import Link from '@material-ui/core/Link';
-import Grid from '@material-ui/core/Grid';
-import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
+import {Button,TextField,Select,MenuItem,Grid} from '@material-ui/core';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
+
+const serverURL = "https://therapycare.herokuapp.com/";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -35,41 +31,78 @@ const useStyles = makeStyles((theme) => ({
 export default function Register() {
   const classes = useStyles();
 
+  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState("general");
+
+
+  const registerUser = async () => {
+    var token = window.localStorage.getItem("authkey");
+    const response = await fetch(serverURL.concat("registeruser"), {
+        method: 'POST',
+        headers: {
+        'Content-Type': 'application/json'
+        },   
+        body: JSON.stringify({  email: email,
+                                name:username,
+                                password:password,
+                                role:role, 
+                                token:token
+                                })
+       });  
+       
+    setEmail("");
+    setUsername("");
+    setPassword("");
+    setRole("general");
+    };
+
+
+  const updateEmail = (event)=>{
+    setEmail(event.target.value);
+  }; 
+
+  const updateUsername = (event)=>{
+    setUsername(event.target.value);
+  }; 
+
+  const updatePassword = (event)=>{
+    setPassword(event.target.value);
+  }; 
+
+  const updateRole = (event)=>{
+    setRole(event.target.value);
+  }; 
+    
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
       <div className={classes.paper}>
-        <Avatar className={classes.avatar}>
-          <LockOutlinedIcon />
-        </Avatar>
         <Typography component="h1" variant="h5">
           Register User
         </Typography>
         <br></br>
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12}>
               <TextField
-                autoComplete="fname"
-                name="firstName"
+                value={username}
                 variant="outlined"
                 required
                 fullWidth
-                id="firstName"
-                label="First Name"
+                label="User Name"
                 autoFocus
+                onChange={updateUsername}
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                variant="outlined"
-                required
-                fullWidth
-                id="lastName"
-                label="Last Name"
-                name="lastName"
-                autoComplete="lname"
-              />
+
+            <Grid item xs={12}>
+              <Select fullWidth value={role} onChange={updateRole} variant="outlined">
+                <MenuItem value="general">General User</MenuItem>
+                <MenuItem value="admin">Admin User</MenuItem>
+              </Select>
             </Grid>
+        
             <Grid item xs={12}>
               <TextField
                 variant="outlined"
@@ -78,7 +111,8 @@ export default function Register() {
                 id="email"
                 label="Email Address"
                 name="email"
-                autoComplete="email"
+                value={email}
+                onChange={updateEmail}
               />
             </Grid>
             <Grid item xs={12}>
@@ -90,7 +124,8 @@ export default function Register() {
                 label="Password"
                 type="password"
                 id="password"
-                autoComplete="current-password"
+                value={password}
+                onChange={updatePassword}
               />
             </Grid>
           
@@ -98,6 +133,7 @@ export default function Register() {
           <Button
             type="submit"
             fullWidth
+            onClick={registerUser}
             variant="contained"
             color="primary"
             className={classes.submit}

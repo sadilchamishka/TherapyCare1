@@ -3,6 +3,8 @@ import React, { useEffect, useState } from 'react';
 import Dashboard from './Dashboard';
 import Nav from './Nav';
 import Register from './Register';
+import Update from './Update';
+
 import {BrowserRouter as Router, Switch, Route} from 'react-router-dom';
 
 import Avatar from '@material-ui/core/Avatar';
@@ -69,7 +71,11 @@ function App() {
                               })
     });
 
+    setEmail("");
+    setPassword("");
+    
     const data = await response.text();
+    console.log(data);
     if (data=="Invalid"){
       console.log("invalid");
     }else{
@@ -79,6 +85,7 @@ function App() {
   }
 
   const getRole = async (token) => {
+    console.log("validate token");
     const response = await fetch(serverURL.concat("auth"), {
       method: 'POST',
       headers: {
@@ -88,6 +95,7 @@ function App() {
     });
 
     const data = await response.text();
+    console.log(data);
     if (data=="Invalid token"){
       console.log("Invalid token");
     }else if(data=="Signature expired"){
@@ -106,6 +114,7 @@ function App() {
               <Switch>
                 <Route path="/" exact render={(props) => <Dashboard {...props} userrole={role} />}/>
                 <Route path="/register" component={Register}/>
+                <Route path="/update" component={Update}/>
               </Switch>
         </Router>
         )
