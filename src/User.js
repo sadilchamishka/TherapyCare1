@@ -3,7 +3,8 @@ import TextField from '@material-ui/core/TextField';
 import {Button, Grid} from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import CreateIcon from '@material-ui/icons/Create';
-
+import { makeStyles } from '@material-ui/core/styles';
+import Paper from '@material-ui/core/Paper';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -12,12 +13,24 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 
 const serverURL = "https://therapycare.herokuapp.com/";
 
-export default function User({email,name,role}) {
+export default function User({useremail,name,role}) {
 
-    const [username, setUsername] = useState(name);
+    const useStyles = makeStyles((theme) => ({
+      paper: {
+        maxWidth: 700,
+        margin: `${theme.spacing(1)}px auto`,
+        padding: theme.spacing(1),
+        textAlign: 'center',
+        color: theme.palette.text.secondary,
+      },
+    }));
+
+    const classes = useStyles();
+
+    const [email, setEmail] = useState(useremail);
     const [userrole, setuserRole] = useState(role);
     const [password, setPassword] = useState("");
-
+    
     const updateUserProfile = async () => {
         var token = window.localStorage.getItem("authkey");
         const response = await fetch(serverURL.concat("updateuser"), {
@@ -26,7 +39,7 @@ export default function User({email,name,role}) {
             'Content-Type': 'application/json'
           },   
           body: JSON.stringify({  email: email,
-                                  name:username, 
+                                  name:name, 
                                   password: password,
                                   token:token
                                   })
@@ -40,7 +53,7 @@ export default function User({email,name,role}) {
         headers: {
         'Content-Type': 'application/json'
         },   
-        body: JSON.stringify({  email: email, 
+        body: JSON.stringify({  name: name, 
                                 token:token
                                 })
        });        
@@ -53,8 +66,8 @@ export default function User({email,name,role}) {
     const handleDeleteClose = () => {setOpenDelete(false);};
 
 
-    const changeUsername = (event)=> {
-        setUsername(event.target.value);
+    const changeEmail = (event)=> {
+        setEmail(event.target.value);
     };
 
     const changePassword = (event)=> {
@@ -90,20 +103,24 @@ export default function User({email,name,role}) {
     const adminDeleteButton = ()=> {
         if (userrole=="general"){
             return (<Button onClick={deleteUserDetails}><DeleteIcon color="secondary"/></Button>)
-        } else{
-            return(<label>Admin User</label>)
         }
     };
 
   return (
     <div>
-        <Grid item xs={20}>
-            <TextField style = {{width: 300}} variant="outlined" value={email}/>
-            <TextField style = {{width: 300}} variant="outlined" value={username}  onChange = {changeUsername}/>
-            <TextField type="password" variant="outlined" value={password}  onChange = {changePassword}/>
-
-            <Button onClick={editUserDetails}><CreateIcon color="primary"/></Button>
-            {adminDeleteButton()}
+          <Grid container spacing={4}>
+              &emsp; &emsp; &emsp; &emsp; &emsp; &emsp;
+              <Grid item xs={2}>
+                <Paper className={classes.paper}><TextField style = {{width: 200}} value={name}/></Paper>
+              </Grid>
+              <Grid item xs={3}>
+                <Paper className={classes.paper}><TextField style = {{width: 350}} value={email}  onChange = {changeEmail}/></Paper>
+              </Grid>
+              <Grid item xs={2}>
+                <Paper className={classes.paper}><TextField type="password" value={password}  onChange = {changePassword}/></Paper>
+              </Grid>
+              <Button onClick={editUserDetails}><CreateIcon color="primary"/></Button>
+              {adminDeleteButton()}
         </Grid>
         <br></br>
         

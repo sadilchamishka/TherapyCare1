@@ -1,12 +1,23 @@
 import React, {useState } from 'react';
-import Avatar from '@material-ui/core/Avatar';
+
+import { green } from '@material-ui/core/colors';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import {Button,TextField,Select,MenuItem,Grid} from '@material-ui/core';
 import Typography from '@material-ui/core/Typography';
-import { makeStyles } from '@material-ui/core/styles';
+import { withStyles,makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 
 const serverURL = "https://therapycare.herokuapp.com/";
+
+const ColorButton = withStyles((theme) => ({
+  root: {
+    color: theme.palette.getContrastText(green[700]),
+    backgroundColor: green[400],
+    '&:hover': {
+      backgroundColor: green[800],
+    },
+  },
+}))(Button);
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -130,7 +141,7 @@ export default function Register() {
             </Grid>
           
           </Grid>
-          <Button
+          <ColorButton
             type="submit"
             fullWidth
             onClick={registerUser}
@@ -139,7 +150,7 @@ export default function Register() {
             className={classes.submit}
           >
             Register
-          </Button>
+          </ColorButton>
       </div>
     </Container>
   );

@@ -4,6 +4,7 @@ import Dashboard from './Dashboard';
 import Nav from './Nav';
 import Register from './Register';
 import Update from './Update';
+import Setting from './Setting';
 
 import {BrowserRouter as Router, Switch, Route} from 'react-router-dom';
 
@@ -13,10 +14,21 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
-import { makeStyles } from '@material-ui/core/styles';
+import { withStyles,makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
+import { green } from '@material-ui/core/colors';
 
 const serverURL = "https://therapycare.herokuapp.com/";
+
+const ColorButton = withStyles((theme) => ({
+  root: {
+    color: theme.palette.getContrastText(green[700]),
+    backgroundColor: green[400],
+    '&:hover': {
+      backgroundColor: green[800],
+    },
+  },
+}))(Button);
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -48,11 +60,11 @@ function App() {
   const classes = useStyles();
 
   const [role, setRole] = useState("");
-  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
 
-  const updateEmail = (event) => {
-    setEmail(event.target.value);
+  const updateName = (event) => {
+    setName(event.target.value);
   }
 
   const updatePassword = (event) => {
@@ -60,19 +72,17 @@ function App() {
   }
 
   const logIn = async () => {
-    console.log(email);
-    console.log(password);
     const response = await fetch(serverURL.concat("login"), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },   
-      body: JSON.stringify({  email: email, 
+      body: JSON.stringify({  name: name, 
                               password: password
                               })
     });
 
-    setEmail("");
+    setName("");
     setPassword("");
 
     const data = await response.text();
@@ -106,21 +116,29 @@ function App() {
     }
   }
 
-
+  const logout = ()=>{
+    localStorage.removeItem("authkey");
+    window.location.reload();
+  }
+  
   const authenticated = () => {
     if (role=="admin"){
       return (
         <Router>
             <Nav/>
               <Switch>
-                <Route path="/" exact render={(props) => <Dashboard {...props} userrole={role} />}/>
+                <Route path="/" exact component={Dashboard}/>
                 <Route path="/register" component={Register}/>
                 <Route path="/update" component={Update}/>
+                <Route path="/setting" component={Setting}/>
               </Switch>
         </Router>
         )
     } else if (role=="general"){
-      return (<Dashboard userrole={role}/>)
+      return (<div>
+                <div align="right"><i onClick={logout} class="fa fa-sign-out" style = {{fontSize:40}}></i></div>
+                <Dashboard/>
+            </div>)
     } else {
       return(<Container component="main" maxWidth="xs">
       <CssBaseline />
@@ -136,13 +154,13 @@ function App() {
             margin="normal"
             required
             fullWidth
-            id="email"
-            label="Email Address"
-            name="email"
-            onChange = {updateEmail}
-            autoComplete="email"
+            id="name"
+            label="User Name"
+            name="name"
+            onChange = {updateName}
+            autoComplete="name"
             autoFocus
-            value={email}
+            value={name}
           />
           <TextField
             variant="outlined"
@@ -158,7 +176,7 @@ function App() {
             value={password}
           />
     
-          <Button
+          <ColorButton
             type="submit"
             fullWidth
             variant="contained"
@@ -167,7 +185,7 @@ function App() {
             className={classes.submit}
           >
             Sign In
-          </Button>
+          </ColorButton>
       </div>
     </Container>)
     }

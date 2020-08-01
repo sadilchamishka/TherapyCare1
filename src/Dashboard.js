@@ -76,7 +76,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-function Dashboard({userrole}) {
+function Dashboard() {
   const classes = useStyles();
 
   const [setting, setSetting] = useState(false);
@@ -461,39 +461,6 @@ function Dashboard({userrole}) {
     
   };
 
-  const updateSetting = () =>{
-    setSetting(!setting);
-  }
-
-  const viewSetting = () =>{
-    if (userrole=="admin"){
-      if (setting){
-        return (
-          <div>
-            <Input type="file" id="f1" variant="contained" color="primary"></Input>
-            <ColorButton  onClick={addGoalFile} variant="contained" color="primary"> Add goals file </ColorButton>
-            &emsp;
-            <Input type="file" id="f2" variant="contained" color="primary"></Input>
-            <ColorButton onClick={addData} variant="contained" color="primary"> Add support items </ColorButton>
-            &emsp;
-            <Input type="file" id="f3" variant="contained" color="primary"></Input>
-            <ColorButton onClick={addPolicies} variant="contained" color="primary"> Add policies </ColorButton>
-  
-            <div align="right">
-              <Button onClick={updateSetting} align="right"><i class="fa fa-gear" style = {{fontSize:40}}></i></Button>
-            </div>
-          </div>
-        )
-      } else{
-        return (
-          <div align="right">
-            <Button onClick={updateSetting} align="right"><i class="fa fa-gear" style = {{fontSize:40}}></i></Button>
-          </div>
-        )
-      }
-    }
-  }
-
 const updateGoals = (opt) => {
   setValue(opt);
 };
@@ -519,44 +486,9 @@ const attachCustomGoal = () =>{
   }
 }
 
-const addGoalFile = () =>{
-  let file = document.getElementById("f1").files[0];
-  let formData = new FormData();
-
-  formData.append("file", file);
-
-  fetch(serverURL.concat("updategoals"), {method: "POST", body: formData});
-}
-
-const addData = () =>{
-  let file = document.getElementById("f2").files[0];
-  let formData = new FormData();
-
-  formData.append("file", file);
-  
-  fetch(serverURL.concat("updatedata"), {method: "POST", body: formData});
-}
-
-const addPolicies = () =>{
-  let file = document.getElementById("f3").files[0];
-  let formData = new FormData();
-
-  formData.append("file", file);
-  
-  fetch(serverURL.concat("updatepolicy"), {method: "POST", body: formData});
-}
-
-const logout = ()=>{
-  localStorage.removeItem("authkey");
-  window.location.reload();
-}
-
   return (
     <div className="Dashboard">
     <br></br>
-  
-    <div align="right"> <ColorButton onClick={logout} variant="contained" color="primary"> Logout </ColorButton> </div>
-      {viewSetting()}
     <Grid>
         <Paper className={classes.paper1}>
     &emsp;<TextField value={participantName} label="Participant Name" onChange={updateParticipantName}></TextField> &emsp;
