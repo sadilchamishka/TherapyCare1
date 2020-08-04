@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import User from './User';
-import {Grid} from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import { InputLabel } from '@material-ui/core';
+import MaterialTable from 'material-table';
 
 const serverURL = "https://therapycare.herokuapp.com/";
 
@@ -12,32 +9,91 @@ export default function Update() {
         getUsers();
       },[]);
 
-    const [users, setUsers] = useState([]);
-
     const getUsers = async ()=>{
-        const response = await fetch(serverURL.concat("users"));
-        const data = await response.json();
-        setUsers(data.users);
+      const response = await fetch(serverURL.concat("users"));
+      const data = await response.json();
+      data.users.map((user)=>{
+        setState((prevState) => {
+          const data = [...prevState.data];
+          data.push(user);
+          return { ...prevState, data };
+        });
+      });
     };
+
+    const [state, setState] = useState({
+      columns: [
+        { title: 'UserName', field: 'name' },
+        { title: 'Email', field: 'email' },
+        { title: 'Password', field: 'password'},
+      ],
+      data: [],
+    });
+
+    const updateUserProfile = async (newData) => {
+      var token = window.localStorage.getItem("authkey");
+      const response = await fetch(serverURL.concat("updateuser"), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },   
+        body: JSON.stringify({  email: newData.email,
+                                name:newData.name, 
+                                password: newData.password,
+                                token:token
+                                })
+      });        
+    };
+  
+  const deleteUserProfile = async (newData) => {
+  var token = window.localStorage.getItem("authkey");
+  const response = await fetch(serverURL.concat("deleteuser"), {
+      method: 'POST',
+      headers: {
+      'Content-Type': 'application/json'
+      },   
+      body: JSON.stringify({  name: newData.name, 
+                              token:token
+                              })
+     });        
+  };
 
     return (
         <div>
-            <h1>Therapycare Staff</h1>
-            <br></br>
-            <Grid container spacing={4}> &emsp; &emsp; &emsp; &emsp; &emsp; &emsp;
-              <Grid item xs={2}>
-                <InputLabel>User Name</InputLabel>
-              </Grid>
-              <Grid item xs={3}>
-                <InputLabel>Email</InputLabel>
-              </Grid>
-              <Grid item xs={2}>
-                <InputLabel>Password</InputLabel>
-              </Grid>
-            </Grid>
-            {users.map((user)=>(
-                <User useremail={user[0]} name={user[1]} role={user[2]}/>
-            ))}
+        <MaterialTable
+        title=""
+        columns={state.columns}
+        data={state.data}
+        editable={{
+          onRowUpdate: (newData, oldData) =>
+            new Promise((resolve) => {
+              setTimeout(() => {
+                resolve();
+                if (oldData) {
+                  setState((prevState) => {
+                    const data = [...prevState.data];
+                    updateUserProfile(newData);
+                    newData.password = "";
+                    data[data.indexOf(oldData)] = newData;
+                    return { ...prevState, data };
+                  });
+                }
+              }, 600);
+            }),
+          onRowDelete: (oldData) =>
+            new Promise((resolve) => {
+              setTimeout(() => {
+                resolve();
+                setState((prevState) => {
+                  const data = [...prevState.data];
+                  deleteUserProfile(data);
+                  data.splice(data.indexOf(oldData), 1);
+                  return { ...prevState, data };
+                });
+              }, 600);
+            }),
+        }}
+      />
         </div>
         
     );

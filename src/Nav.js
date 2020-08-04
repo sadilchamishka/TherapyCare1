@@ -10,7 +10,7 @@ function Nav() {
 
     const logout = ()=>{
         localStorage.removeItem("authkey");
-        window.location.reload();
+        document.location.href="/";
       }
 
     return (
