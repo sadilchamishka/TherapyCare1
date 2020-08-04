@@ -45,14 +45,14 @@ export default function Update() {
       });        
     };
   
-  const deleteUserProfile = async (newData) => {
+  const deleteUserProfile = async (dropdata) => {
   var token = window.localStorage.getItem("authkey");
   const response = await fetch(serverURL.concat("deleteuser"), {
       method: 'POST',
       headers: {
       'Content-Type': 'application/json'
       },   
-      body: JSON.stringify({  name: newData.name, 
+      body: JSON.stringify({  name: dropdata[0].name, 
                               token:token
                               })
      });        
@@ -86,8 +86,7 @@ export default function Update() {
                 resolve();
                 setState((prevState) => {
                   const data = [...prevState.data];
-                  deleteUserProfile(data);
-                  data.splice(data.indexOf(oldData), 1);
+                  deleteUserProfile(data.splice(data.indexOf(oldData), 1));
                   return { ...prevState, data };
                 });
               }, 600);
