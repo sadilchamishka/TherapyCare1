@@ -11,7 +11,7 @@ import { green } from '@material-ui/core/colors';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 
-const serverURL = "https://therapycare-backend.herokuapp.com/";
+const serverURL = "https://therapycare.herokuapp.com/";
 
 const ColorButton = withStyles((theme) => ({
   root: {

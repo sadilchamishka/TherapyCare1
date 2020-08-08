@@ -6,7 +6,7 @@ import { withStyles,makeStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 
-const serverURL = "https://therapycare.herokuapp.com/";
+const serverURL =  "https://therapycare.herokuapp.com/";
 
 const ColorButton = withStyles((theme) => ({
     root: {
@@ -57,17 +57,17 @@ function Setting() {
         <br></br>
             <Grid>
                 <Paper className={classes.paper1}>
-                    <Input type="file" id="f1" variant="contained" color="primary"></Input>  &emsp;
+                    <Input type="file" id="f1" color="primary"></Input>  &emsp;
                     <ColorButton style={{float: 'right'}}  onClick={addGoalFile} variant="contained" color="primary"> Add goals file </ColorButton>
                 </Paper>
                 <br></br>
                 <Paper className={classes.paper1}>
-                    <Input type="file" id="f2" variant="contained" color="primary"></Input>  &emsp;
+                    <Input type="file" id="f2"  color="primary"></Input>  &emsp;
                     <ColorButton style={{float: 'right'}} onClick={addData} variant="contained" color="primary"> Add support items </ColorButton>
                 </Paper>
                 <br></br>
                 <Paper className={classes.paper1}>
-                    <Input type="file" id="f3" variant="contained" color="primary"></Input>  &emsp;
+                    <Input type="file" id="f3"  color="primary"></Input>  &emsp;
                     <ColorButton style={{float: 'right'}} onClick={addPolicies} variant="contained" color="primary"> Add policies </ColorButton>
                 </Paper>
             </Grid>
