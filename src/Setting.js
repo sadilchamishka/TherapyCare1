@@ -28,28 +28,42 @@ const ColorButton = withStyles((theme) => ({
     }
   }));
 
+const displayMSG = (msg) =>{
+  if (msg=="Success"){
+    alert("Successful");
+  } else{
+    alert("Failed");
+  }
+};
+  
 function Setting() {
     const classes = useStyles();
 
-    const addGoalFile = () =>{
+    const addGoalFile = async () =>{
         let file = document.getElementById("f1").files[0];
         let formData = new FormData();
         formData.append("file", file);
-        fetch(serverURL.concat("updategoals"), {method: "POST", body: formData});
+        const response = await fetch(serverURL.concat("updategoals"), {method: "POST", body: formData});
+        const data = await response.text();
+        displayMSG(data);
     }
 
-    const addData = () =>{
+    const addData = async () =>{
         let file = document.getElementById("f2").files[0];
         let formData = new FormData();
         formData.append("file", file);
-        fetch(serverURL.concat("updatedata"), {method: "POST", body: formData});
+        const response = await fetch(serverURL.concat("updatedata"), {method: "POST", body: formData});
+        const data = await response.text();
+        displayMSG(data);
     }
 
-    const addPolicies = () =>{
+    const addPolicies = async () =>{
         let file = document.getElementById("f3").files[0];
         let formData = new FormData();
         formData.append("file", file);
-        fetch(serverURL.concat("updatepolicy"), {method: "POST", body: formData});
+        const response = await fetch(serverURL.concat("updatepolicy"), {method: "POST", body: formData});
+        const data = await response.text();
+        displayMSG(data);
     }
 
     return (

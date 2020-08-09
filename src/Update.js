@@ -25,7 +25,14 @@ export default function Update() {
       columns: [
         { title: 'UserName', field: 'name' },
         { title: 'Email', field: 'email' },
-        { title: 'Password', field: 'password'},
+        { title: 'Password', field: 'password',render: () => null,
+            editComponent: props => (
+            <input
+              type="password"
+              value={props.value}
+              onChange={e => props.onChange(e.target.value)}
+            />
+          )},
       ],
       data: [],
     });
