@@ -47,7 +47,6 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("general");
 
-
   const registerUser = async () => {
     var token = window.localStorage.getItem("authkey");
     const response = await fetch(serverURL.concat("registeruser"), {
@@ -62,7 +61,13 @@ export default function Register() {
                                 token:token
                                 })
        });  
-       
+    
+    const data =  await response.text();
+    if (data=="Success"){
+      alert("Successfully Registered");
+    } else{
+      alert("User Already Exist");
+    }
     setEmail("");
     setUsername("");
     setPassword("");

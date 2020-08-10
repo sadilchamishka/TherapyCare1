@@ -32,7 +32,7 @@ const displayMSG = (msg) =>{
   if (msg=="Success"){
     alert("Successful");
   } else{
-    alert("Failed");
+    alert("Failed due to invalid column names");
   }
 };
   
