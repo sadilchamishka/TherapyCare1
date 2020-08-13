@@ -7,7 +7,7 @@ import Typography from '@material-ui/core/Typography';
 import { withStyles,makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 
-const serverURL = process.env.BACKEND;
+const serverURL = "https://therapycare.herokuapp.com/";
 
 const ColorButton = withStyles((theme) => ({
   root: {
